@@ -157,7 +157,6 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 			dragActiveΔ(false)
 			const insideFrame = (view.pxAbsolute/2)-(60-3)-(.5*scale.unit*proxyNode.length.y)
 			// 60 is the frame section height, 3 is from their outlines
-			console.log(`bazinga`,insideFrame)
 			if(data.y < -insideFrame){ // higher than top frame
 				if(proxyNode.hasCanvas){canvasIDΔ(proxyNode.id)}
 			}

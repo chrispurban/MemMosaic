@@ -140,12 +140,12 @@ export default function Canvas(){
 			onDoubleClick={(e:any)=>{
 				if([...e.target.classList].includes("canvas")){
 				  	console.log(`doubleclick detected in empty canvas at x:${e.pageX} y:${e.pageY}`)
-				  	/*
 					nodeGeneration(
 						e.ctrlKey,
 						(Math.round((e.pageX-(window.innerWidth/2))/(scale.unit/2)))/6,
 						(Math.round((e.pageY-(window.innerHeight/2))/(scale.unit/2)))/6
 					);
+						  /*
 					*/
 				}
 			}}
