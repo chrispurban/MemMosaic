@@ -22,6 +22,7 @@ import React from 'react';
 
 import Link from "./LinkComponent";
 import Node from "./NodeComponent";
+import Login from "./LoginComponent";
 
 import Draggable from 'react-draggable';
 import * as localStorage from 'store2';
@@ -149,6 +150,8 @@ export default function Frame(){
           }
         }}
       >
+
+			<Login/>
 
         <div
           style={{

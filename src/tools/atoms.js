@@ -105,19 +105,21 @@ export const node_atom = mem(
 						//console.warn(`existing values for node ${nodeID}` )
 						localStorage.transact('nodes', (content)=>{
 							let node = content.find((o)=>o.id==nodeID) // correlating the content to the ID
-							node.text = changedValues.text // can we just replace it wholesale?
-							node.links = changedValues.links // can we just replace it wholesale?
-							node.icon = changedValues.icon // can we just replace it wholesale?
-
-							//repair color formatting
-							node.color = [
-								`hsl(`,
-								`${node.color.split(",")[0].replace(/\D/g,'')*1},`,
-								`${node.color.split(",")[1].replace(/\D/g,'')*1}%,`,
-								`${node.color.split(",")[2].replace(/\D/g,'')*1}%`,
-								`)`,
-							].join("")
-
+							if(node){
+								node.text = changedValues.text // can we just replace it wholesale?
+								node.links = changedValues.links // can we just replace it wholesale?
+								node.icon = changedValues.icon // can we just replace it wholesale?
+	
+								//repair color formatting
+								node.color = [
+									`hsl(`,
+									`${node.color.split(",")[0].replace(/\D/g,'')*1},`,
+									`${node.color.split(",")[1].replace(/\D/g,'')*1}%,`,
+									`${node.color.split(",")[2].replace(/\D/g,'')*1}%`,
+									`)`,
+								].join("")
+	
+							}
 						})
 					}
 				);
