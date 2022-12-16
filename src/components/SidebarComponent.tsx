@@ -108,7 +108,7 @@ export default function Sidebar(){
 						User accounts are authenticated purely by email confirmation link
 					</div>
 					<div>
-						They aren't currently connected to anything
+						They are not currently connected to anything
 					</div>
 				</div>
 			}
