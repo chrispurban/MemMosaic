@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { __x, __o, defaultNodes, defaultLinks } from './defaults';
 import localStorage from "store2";
+import { useSession, signIn, signOut, } from "next-auth/react";
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,6 +54,7 @@ export function resetApp(){
 	localStorage("canvas", "N 0");
 	//localStorage("pocket", null);
 	console.error("resetting...")
+	signOut()
 	setTimeout(()=>{
 		if (typeof window !== "undefined"){
 			window.location.reload()// "true" not wanted by TypeScript

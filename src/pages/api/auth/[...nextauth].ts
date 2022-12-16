@@ -6,25 +6,38 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "../../../env/server.mjs";
 import { prisma } from "../../../server/db/client";
 
+import CredentialsProvider from "next-auth/providers/credentials";
+import CredentialsConfig from "next-auth/providers/credentials.js";
+
+import { Magic } from '@magic-sdk/admin'
+const magic = new Magic(env.MAGIC_SECRET_KEY)
+
 export const authOptions: NextAuthOptions = {
-  // Include user.id on session
-  callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-      }
-      return session;
-    },
-  },
-  // Configure one or more authentication providers
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
-    // ...add more providers here
-  ],
+	session:{
+		strategy: "jwt"
+	},
+	pages:{
+		signIn:'/',
+	},
+  	adapter: PrismaAdapter(prisma),
+  	providers: [
+    	CredentialsProvider({
+			name:'Magic Link',
+			credentials:{
+				didToken: {label: 'DID Token', type:'text'}
+			},
+			async authorize({didToken}:any, req):Promise<any>{
+				// validate magic DID token
+				magic.token.validate(didToken);
+
+				// fetch user metadata
+				const metadata = await magic.users.getMetadataByToken(didToken);
+
+				// return user info
+				return {...metadata}
+			}
+    	})
+  	],
 };
 
 export default NextAuth(authOptions);

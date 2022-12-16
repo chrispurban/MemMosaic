@@ -10,6 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@magic-sdk/admin": "^1.8.0",
     "@next-auth/prisma-adapter": "^1.0.4",
     "@prisma/client": "^4.5.0",
     "@tanstack/react-query": "^4.10.0",
@@ -17,12 +18,14 @@
     "@trpc/next": "10.0.0-rc.4",
     "@trpc/react-query": "10.0.0-rc.4",
     "@trpc/server": "10.0.0-rc.4",
+    "magic-sdk": "^10.1.0",
     "mem": "^9.0.2",
     "next": "13.0.2",
     "next-auth": "^4.15.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-draggable": "^4.4.5",
+    "react-hook-form": "^7.40.0",
     "recoil": "^0.7.6",
     "store2": "^2.14.2",
     "superjson": "1.9.1",

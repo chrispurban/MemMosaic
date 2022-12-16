@@ -119,49 +119,51 @@ export default function Canvas(){
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 
-	return(<>
+	return(
+		<>
 		
-		<div
-			style={{
-				margin:'auto',
-				height:'100vh',
-				width:'100vw',
-				backgroundColor:node.color,
-			}}
-			className="canvas"
-			onTouchStart={(e)=>{
-				console.log("touch begin")
-				//if([...e.target.classList].includes("canvas")){sustainedInputΔ(800)}
-				// you do want this constrained to mobile, as on tablet this opens right-click menu
-			}}
-			onTouchEnd={(e)=>{
-				sustainedInputΔ(null)
-			}}
-			onDoubleClick={(e:any)=>{
-				if([...e.target.classList].includes("canvas")){
-				  	console.log(`doubleclick detected in empty canvas at x:${e.pageX} y:${e.pageY}`)
-					nodeGeneration(
-						e.ctrlKey,
-						(Math.round((e.pageX-(window.innerWidth/2))/(scale.unit/2)))/6,
-						(Math.round((e.pageY-(window.innerHeight/2))/(scale.unit/2)))/6
-					);
-						  /*
-					*/
-				}
-			}}
-		>
-			{
-				node.links.map((linkID:any)=>{
-					return(
-						<Link key={linkID} linkID={linkID}/>
+			<div
+				style={{
+					margin:'auto',
+					height:'100vh',
+					width:'100vw',
+					backgroundColor:node.color,
+				}}
+				className="canvas"
+				onTouchStart={(e)=>{
+					console.log("touch begin")
+					//if([...e.target.classList].includes("canvas")){sustainedInputΔ(800)}
+					// you do want this constrained to mobile, as on tablet this opens right-click menu
+				}}
+				onTouchEnd={(e)=>{
+					sustainedInputΔ(null)
+				}}
+				onDoubleClick={(e:any)=>{
+					if([...e.target.classList].includes("canvas")){
+						console.log(`doubleclick detected in empty canvas at x:${e.pageX} y:${e.pageY}`)
+						nodeGeneration(
+							e.ctrlKey,
+							(Math.round((e.pageX-(window.innerWidth/2))/(scale.unit/2)))/6,
+							(Math.round((e.pageY-(window.innerHeight/2))/(scale.unit/2)))/6
+						);
+							/*
+						*/
+					}
+				}}
+			>
+				{
+					node.links.map(
+						(linkID:any)=>{
+							return(
+								<Link key={linkID} linkID={linkID}/>
+							)
+						}
 					)
 				}
-						
-				)
-			}
-			
-		</div>
+				
+			</div>
 
-	</>)
+		</>
+	)
 
 }

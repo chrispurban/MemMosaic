@@ -155,10 +155,11 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 		if(dragActive){
 			if(selectedNodeID==proxyNode.id && !textEditable){selectedNodeIDΔ(null)} // deselect if not still editing
 			dragActiveΔ(false)
-			const insideFrame = (view.pxAbsolute/2)-(60-3)-(.5*scale.unit*proxyNode.length.y)
-			// 60 is the frame section height, 3 is from their outlines
+			const insideFrame = (view.pxAbsolute/2)-(60+2)-(.5*scale.unit*proxyNode.length.y)
+			// 60 is the frame section height, 2 is from their outlines
 			if(data.y < -insideFrame){ // higher than top frame
 				if(proxyNode.hasCanvas){canvasIDΔ(proxyNode.id)}
+				// also put the current canvas in the pocket
 			}
 			else if(data.y > insideFrame){ // lower than bottom frame
 				if(proxyNode.hasCanvas){pocketIDΔ(proxyNode.id)}
@@ -216,31 +217,9 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	useEffect(()=>{
-		const handleKey = (e:any)=>{
-			if(e.key == "Home"){
-				//console.clear()
-				//console.log(`proxy`,proxyNode)
-				//console.log(`node`,proxyNode.id)
-				//console.log(`selected`,selectedNodeID)
-				//console.log(`editingText`,textEditable)
-			}
-		}
-		window.addEventListener('keyup', handleKey);
-		return ()=>{
-			window.removeEventListener('keyup', handleKey);
-		};
-	},[
-		proxyNode,
-		dragActive,
-		textEditable,
-		selectedNodeID,
-	]);
-	
-	///////////////////////////////////////////////////////////////////////////////////////
-	
-	useEffect(()=>{
 		if(textEditable){
 			const end = textInputValue.length
+			console.log(end)
 			textRef.current.setSelectionRange(end, end)
 			textRef.current.focus()
 		}
@@ -310,30 +289,30 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 				//selectedNodeIDΔ(null)
 			}
 		};
-  
+		  
 		const handleClick = (e:any)=>{
 			if(componentRef.current && !componentRef.current.contains(e.target)){ // clicked outside component
 				// if(menuPop == linkMaster.id){menuPopΔ(null)}
 				if(textEditable){
 					if(!protectedClickOut){ // not simply highlihgting from inside the textbox
-					if(![...e.target.offsetParent.classList].includes("node")){ // watch out for how the node html/css is structured
-						selectedNodeIDΔ(null) // didn't pick another node
-					}
-					if(textInputValue.trim().length==0){ // is ending as a blank whatever
-						if(
-							__o
-							|| (proxyNode.text.length==0 && proxyNode.hasCanvas) // started as a blank canvas
-							|| !proxyNode.hasCanvas // isn't a canvas at all
-						){linkDestruction(proxyNode.linkMaster)} // blank counts as final, get rid of it
-						else{ // is currently blank but didn't start blank and is a canvas
-							textInputValueΔ(proxyNode.text) // revert back, do nothing
+						if(![...e.target.offsetParent.classList].includes("node")){ // watch out for how the node html/css is structured
+							selectedNodeIDΔ(null) // didn't pick another node
 						}
-					}
-					else if(textChanged){ // isn't ending as a blank whatever
-						targetNodeΔ( (n:any)=>{return{...n, text:textInputValue}} )
-						textInputValueΔ(v=>v.trim())
-					}
-					textEditableΔ(false);
+						if(textInputValue.trim().length==0){ // is ending as a blank whatever
+							if(
+								__o
+								|| (proxyNode.text.length==0 && proxyNode.hasCanvas) // started as a blank canvas
+								|| !proxyNode.hasCanvas // isn't a canvas at all
+							){linkDestruction(proxyNode.linkMaster)} // blank counts as final, get rid of it
+							else{ // is currently blank but didn't start blank and is a canvas
+								textInputValueΔ(proxyNode.text) // revert back, do nothing
+							}
+						}
+						else if(textChanged){ // isn't ending as a blank whatever
+							targetNodeΔ( (n:any)=>{return{...n, text:textInputValue}} )
+							textInputValueΔ(v=>v.trim())
+						}
+						textEditableΔ(false);
 					}
 				}
 			}
@@ -477,6 +456,16 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 														cols={proxyNode.hasCanvas?8:29}
 														ref={textRef}
 														value={textInputValue}
+														onKeyDown={(e)=>{
+															if(
+																__x
+																&& e.key == "Enter"
+																//&& !e.shiftKey
+															){
+																e.preventDefault(); 
+																return true
+															}
+														}}
 														onChange={(e)=>{
 															textInputValueΔ(e.target.value)
 															textChangedΔ(true)

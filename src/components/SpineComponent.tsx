@@ -17,6 +17,7 @@ import localStorage from "store2";
 import Frame from "./FrameComponent";
 import Canvas from "./CanvasComponent";
 import Report from "./ReportComponent";
+import Sidebar from './SidebarComponent';
 
 console.error(`Secret tip: to reset local storage, hold ALT and double-click the top bar.`)
 
@@ -38,6 +39,7 @@ export default function Spine(props:any){
 
 	return(
 		<>
+			<Sidebar/>
 			<Frame/>
 			<Canvas/>
 			<Report/>

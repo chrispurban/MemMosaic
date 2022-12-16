@@ -7,7 +7,7 @@ import Node from "./NodeComponent";
 
 export default function Link({linkID}:any){
 
-  const linkMaster = useRecoilValue(linkMaster_selector(linkID)); // aggregates and updates from the following
+  const linkMaster = useRecoilValue(linkMaster_selector(linkID));
   const proxyNode = {
     ...linkMaster.nodes.target,
     length:linkMaster.length,
