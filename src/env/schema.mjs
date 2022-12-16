@@ -19,7 +19,6 @@ export const serverSchema = z.object({
     // VERCEL_URL doesnt include `https` so it cant be validated as a URL
     process.env.VERCEL ? z.string() : z.string().url(),
   ),
-  NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: z.string(),
   MAGIC_SECRET_KEY: z.string(),
   TOKEN_SECRET: z.string(),
 });
@@ -30,6 +29,7 @@ export const serverSchema = z.object({
  * To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 export const clientSchema = z.object({
+  NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: z.string(),
   // NEXT_PUBLIC_BAR: z.string(),
 });
 
@@ -40,5 +40,6 @@ export const clientSchema = z.object({
  * @type {{ [k in keyof z.infer<typeof clientSchema>]: z.infer<typeof clientSchema>[k] | undefined }}
  */
 export const clientEnv = {
+  NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY
   // NEXT_PUBLIC_BAR: process.env.NEXT_PUBLIC_BAR,
 };
