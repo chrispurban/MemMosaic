@@ -75,7 +75,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 6",
-		text: `Clicking the top bar will always send you to the Origin topic, while "pocketing" a return link`,
+		text: `The bottom bar can copy any link dragged into it (temporary) and out again (permanent)`,
 		icon: null,
 		links: [
 			"L 6"
@@ -84,7 +84,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 7",
-		text: `Holding CTRL while clicking will create a topic instead of a note, or edit a link instead of visit it`,
+		text: `Holding CTRL while clicking will create a topic instead of a note, or edit the link instead of visit`,
 		icon: null,
 		links: [
 			"L 7"
@@ -93,7 +93,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 8",
-		text: `The bottom bar can hold and make a copy of any link by dragging in and out of it`,
+		text: `Clicking the top bar will always send you to the Origin topic while storing a return link`,
 		icon: null,
 		links: [
 			"L 8"
