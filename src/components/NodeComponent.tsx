@@ -5,10 +5,10 @@ import {
   view_atom,
   link_atom,
   node_atom,
-  selectedNodeID_atom,
   canvasID_atom,
   pocketID_atom,
   atlas_selector,
+  selectedNodeID_atom,
 } from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import { memo, useState, useEffect, useRef, } from 'react';
@@ -40,6 +40,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 
 	const textRef:any = useRef<HTMLInputElement>(null);
 	const componentRef = useRef<HTMLDivElement>(null);
+	const draggableRef = useRef<HTMLDivElement>(null);  
 
 	const [ dragEnabled, dragEnabledΔ ] = useState(true)
 	const [ dragActive, dragActiveΔ ] = useState(false)
@@ -58,6 +59,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 		proxyNode, textEditable
 	]);
 
+	
 	const [ protectedClickOut, protectedClickOutΔ ] = useState(false);
 	useEffect(()=>{ // for if you started highlighting while editing text and then dragged out
 		const handleClick = (e:any)=>{
@@ -130,6 +132,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	function onStart(event:any, data:any){ //console.log(`${proxyNode.id} start detected`)
 		if(selectedNodeID!==proxyNode.id){// not coming from a duplicate
 			selectedNodeIDΔ(proxyNode.id)
+			
 		}
 		if(textRef.current && textRef.current.contains(event.target)){ // don't drag if clicking textbox
 			return(false)
@@ -150,16 +153,18 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////
-	
+
 	function onStop(event:any ,data:any){ //console.log(`${proxyNode.id} stop detected`)
 		if(dragActive){
-			if(selectedNodeID==proxyNode.id && !textEditable){selectedNodeIDΔ(null)} // deselect if not still editing
 			dragActiveΔ(false)
+			if(selectedNodeID==proxyNode.id && !textEditable){selectedNodeIDΔ(null)} // deselect if not still editing
 			const insideFrame = (view.pxAbsolute/2)-(60+2)-(.5*scale.unit*proxyNode.length.y)
 			// 60 is the frame section height, 2 is from their outlines
 			if(data.y < -insideFrame){ // higher than top frame
-				if(proxyNode.hasCanvas){canvasIDΔ(proxyNode.id)}
-				// also put the current canvas in the pocket
+				if(proxyNode.hasCanvas){
+					pocketIDΔ(canvasID)
+					canvasIDΔ(proxyNode.id) // also put the current canvas in the pocket
+				}
 			}
 			else if(data.y > insideFrame){ // lower than bottom frame
 				if(proxyNode.hasCanvas){pocketIDΔ(proxyNode.id)}
@@ -211,7 +216,9 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 				canvasIDΔ(proxyNode.id)
 			}
 		}
+		
 		dragEnabledΔ(true)
+		
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +226,6 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	useEffect(()=>{
 		if(textEditable){
 			const end = textInputValue.length
-			console.log(end)
 			textRef.current.setSelectionRange(end, end)
 			textRef.current.focus()
 		}
@@ -276,7 +282,6 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 			 	else{ // not inPocket
 					switch(e.key){
 					case "Delete":
-						selectedNodeIDΔ(null)
 						linkDestruction(proxyNode.linkMaster)
 					case "Escape":
 						dragEnabledΔ(false);
@@ -340,12 +345,12 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	]);
 	
 	///////////////////////////////////////////////////////////////////////////////////////
-	
+
 	return(<>
 		{
 			__x
 			&& proxyNode.id
-			&& view
+			&& (!inPocket || view)
 			&& <div
 				ref={componentRef}
 				style={{
@@ -361,6 +366,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 				}}
 			>
 				<Draggable
+					nodeRef={draggableRef}
 					grid={[scale.unit/4, scale.unit/4]}
 					position={(inPocket || onCanvas)?{
 						x:0,
@@ -379,9 +385,12 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 					onStart={onStart} onDrag={onDrag} onStop={onStop}
 					disabled={!dragEnabled || (inPocket && proxyNode.id == canvasID)}
 				>
-					<div style={{
-						//position:`relative`,
-					}}>
+					<div
+						ref={draggableRef} // used under advisement of Draggable package developer to handle FindDOMNode deprecation
+						style={{
+							//position:`relative`,
+						}}
+					>
 						<div
 							style={{
 								position:`absolute`,
