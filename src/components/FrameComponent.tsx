@@ -33,7 +33,7 @@ import * as localStorage from 'store2';
 export default function Frame(){
 
 	const scale = useRecoilValue(scale_atom);
-	const selectedNodeID = useRecoilValue(selectedNodeID_atom);
+	
 
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom); // change which canvas is active
 	const [ canvasNode, canvasNodeΔ ] = useRecoilState(node_atom(canvasID));
@@ -66,28 +66,7 @@ export default function Frame(){
 		zIndex:4,
 	}
 
-	useEffect(()=>{
-		const handleKey = (e:any)=>{
-			if(pocketID && !selectedNodeID){
-				switch(e.key){
-					case "Delete":
-					case "Escape":
-						pocketIDΔ(null)
-					break;
-					case "Enter":
-						//textEditableΔ(true)
-					break;
-				}
-			}
-		}
-		window.addEventListener('keyup', handleKey);
-		return ()=>{
-			window.removeEventListener('keyup', handleKey);
-		};
-	},[
-		pocketID,
-		selectedNodeID,
-	]);
+
 
   	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -218,20 +197,50 @@ export default function Frame(){
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-	function FrameBottom(){return(<>
-		{
-			__x
-			&& pocketNode
-			&& <Node proxyNode={proxyNode( pocketNode, 3, 1 )} inPocket={true}/>
-		}
-		<div
-			style={{
-				...baseStyle,
-				bottom:`0px`,
-				//paddingTop:`4px`,
-			}}
-		/>
-	</>)}
+	function FrameBottom(){
+		
+		// if this gets moved up into the main frame function, drag effect will get stuck, requiring two clicks
+		// apparently this mixing with pocketID doesn't cause a problem though
+		// possibly a mounting issue where any property in here would ensure it's updated
+		const selectedNodeID = useRecoilValue(selectedNodeID_atom);
+		useEffect(()=>{
+			const handleKey = (e:any)=>{
+				if(pocketID && !selectedNodeID){
+					switch(e.key){
+						case "Delete":
+						case "Escape":
+							pocketIDΔ(null)
+						break;
+						case "Enter":
+							//textEditableΔ(true)
+						break;
+					}
+				}
+			}
+			window.addEventListener('keyup', handleKey);
+			return ()=>{
+				window.removeEventListener('keyup', handleKey);
+			};
+		},[
+			pocketID,
+			selectedNodeID,
+		]);
+		
+		return(<>
+			{
+				__x
+				&& pocketNode
+				&& <Node proxyNode={proxyNode( pocketNode, 3, 1 )} inPocket={true}/>
+			}
+			<div
+				style={{
+					...baseStyle,
+					bottom:`0px`,
+					//paddingTop:`4px`,
+				}}
+			/>
+		</>)
+	}
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
