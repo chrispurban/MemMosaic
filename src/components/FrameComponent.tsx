@@ -8,6 +8,7 @@ import {
 	node_atom,
 	link_atom,
 	pocketID_atom,
+	sidebarExpand_atom,
 } from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import {
@@ -203,9 +204,10 @@ export default function Frame(){
 		// apparently this mixing with pocketID doesn't cause a problem though
 		// possibly a mounting issue where any property in here would ensure it's updated
 		const selectedNodeID = useRecoilValue(selectedNodeID_atom);
+		const [ expanded, expandedΔ ] = useRecoilState(sidebarExpand_atom)
 		useEffect(()=>{
 			const handleKey = (e:any)=>{
-				if(pocketID && !selectedNodeID){
+				if(pocketID && !selectedNodeID && !expanded){
 					switch(e.key){
 						case "Delete":
 						case "Escape":
@@ -224,6 +226,7 @@ export default function Frame(){
 		},[
 			pocketID,
 			selectedNodeID,
+			expanded,
 		]);
 		
 		return(<>

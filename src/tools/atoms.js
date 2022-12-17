@@ -25,6 +25,18 @@ export const view_atom = atom({
 
 /////////////////////////////////////////////////////////////////////
 
+export const sidebarExpand_atom = atom({
+	key:"sidebarExpand_atom",
+	default:false,
+	effects:[
+		({onSet})=>{ onSet( (changedValues)=>{
+			//console.log(`toggling sidebar`)
+		} ); }
+	],
+});
+
+/////////////////////////////////////////////////////////////////////
+
 export const selectedNodeID_atom = atom({
 	key:"selectedNodeID_atom",
 	default:null,
@@ -81,7 +93,8 @@ export const menuPop_atom = atom({
 
 export const pocketID_atom = atom({
 	key:"pocketID_atom",
-	default:null, //localStorage("pocket"),
+	default:null,
+	//default:localStorage("pocket")||null,
 	effects:[
 		({onSet})=>{ onSet( (changedValues)=>{
 			//localStorage("pocket", changedValues);

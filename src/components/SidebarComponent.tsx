@@ -10,6 +10,7 @@ import { useRecoilState } from 'recoil';
 import {
 	canvasID_atom,
 	node_atom,
+	sidebarExpand_atom,
 } from "../tools/atoms";
 
 /*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
@@ -18,13 +19,14 @@ export default function Sidebar(){
 
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
-	const [ expanded, expandedΔ ] = useState(false)
+	const [ expanded, expandedΔ ] = useRecoilState(sidebarExpand_atom)
 
-	const componentRef = useRef<HTMLDivElement>(null);
+	const componentRef = useRef<HTMLDivElement>(null)
 
-	const {data: sessionData} = useSession(); 
-
+	
 	/*
+	const {data: sessionData} = useSession()
+	
 	const {data: secretMessage} = trpc.auth.getSecretMessage
 		.useQuery(
 			undefined, // no input
@@ -87,7 +89,7 @@ export default function Sidebar(){
 					userSelect:`none`,
 				}}
 				onClick={(e)=>{
-					expandedΔ(v=>!v)
+					expandedΔ((v:boolean)=>!v)
 					e.stopPropagation()
 				}}
 			>
