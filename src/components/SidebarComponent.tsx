@@ -26,7 +26,7 @@ export default function Sidebar(){
 	
 	/*
 	const {data: sessionData} = useSession()
-	
+
 	const {data: secretMessage} = trpc.auth.getSecretMessage
 		.useQuery(
 			undefined, // no input
@@ -119,31 +119,37 @@ export default function Sidebar(){
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-	function SidebarRight(){return(<>
-		{
-			__o
-			&&	<div
-				style={{
-					position:'absolute',
-					right:'10px', top:'10px',
-					height:'40px',
-					//width:'120px',
-					textAlign:`center`,
-					zIndex:'900',
-					backgroundColor:'black',
-				}}
-			>
-				{/*
-					__o 
-					&& secretMessage
-					&& <span> - {secretMessage}</span>
-				}
-				{
-					hello.data ? hello.data.greeting : "Loading tRPC query..."
-				*/}
-			</div>
-		}
-	</>)}
+	function SidebarRight(){
+	
+		// convert top bar to toggle for a menu for editing the canvas properties
+		// right sidebar contains travel history, origin at top
+		// origin will later be removed in favor of expanded view of the entire network that's not tied to anything
+		return(<>
+			{
+				__o
+				&&	<div
+					style={{
+						position:'absolute',
+						right:'10px', top:'10px',
+						height:'40px',
+						//width:'120px',
+						textAlign:`center`,
+						zIndex:'900',
+						backgroundColor:'black',
+					}}
+				>
+					{/*
+						__o 
+						&& secretMessage
+						&& <span> - {secretMessage}</span>
+					}
+					{
+						hello.data ? hello.data.greeting : "Loading tRPC query..."
+					*/}
+				</div>
+			}
+		</>)
+	}
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
