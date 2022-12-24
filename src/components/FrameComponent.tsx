@@ -48,19 +48,19 @@ export default function Frame(){
 		return({
 			...passedNode,
 			length:{x:x,y:y,},
-			hasCanvas:true,
+			canTravel:true,
 		})
 	}
 
 	//console.log(`proxy`,proxyNode(canvasNode))
 
 	const baseStyle:React.CSSProperties = {
+		display:`flex`,
 		position:`absolute`,
 		left:`0px`, right:`0px`,
 		height:`60px`,
-		display:`flex`,
-		backgroundColor:recolor(canvasNode.color, {lum:-10,sat:0,hue:0,}),
 		outline:`2px solid ${recolor(canvasNode.color, {lum:-30,sat:0,hue:0,})}`,
+		backgroundColor:recolor(canvasNode.color, {lum:-10,sat:0,hue:0,}),
 		alignItems:`center`, justifyContent:`center`,
 		userSelect:`none`,
 		zIndex:4,
@@ -70,136 +70,24 @@ export default function Frame(){
 
   	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	function FrameTop(){return(<>
-		{
-			__x
-			&& canvasNode
-			&& <Node proxyNode={proxyNode( canvasNode, 3+(3*3)/4, 1+(1*1)/4 )} onCanvas={true}/>
-		}
-		<div
-			style={{
-				...baseStyle,
-				top:`0px`,
-				fontSize:`150%`,
-				display:`flex`,
-			}}
-			onClick={(e)=>{ // add limited orphan protection; if none of its nodes are links, it's in danger
-				if(
-					__x
-					//&& !editingText
-					&& !(e.altKey)
-				){
-					if(
-						true
-						//e.ctrlKey
-					){
-						//editingTextΔ(true);
-						//textInputValueΔ(canvasNode.text);
-						//pocketIDΔ(null)
-					}
-					else{
-						if(canvasID !== "N 0"){// you're not on the origin
-							if(!pocketID){ // nothing in pocket
-								pocketIDΔ(canvasID) // save current location as the return point
-							}
-							if(pocketID == "N 0"){
-								pocketIDΔ(canvasID)
-							}
-							canvasIDΔ("N 0") // go to origin
-						}
-					}
-				}
-			}}
-			onDoubleClick={(e)=>{
-				if(
-					__x
-					&& e.altKey
-					//&& canvasNode.id == "N 0"
-				){
-					resetApp()
-				}
-			}}
-		>
-
+	function FrameTop(){
+		
+		return(<>
 			{
-				__o
-				&& <div
-					style={{
-						display:`flex`, flexDirection:`row`,
-						width:`200px`, height:`50px`,
-						lineHeight:`${100}%`,
-						outline:`1px solid black`,
-					}}
-				>
-					{
-						__x
-						&& canvasNode.icon
-						&& <div style={{
-							display:`flex`,
-							alignItems:`center`, justifyContent:`center`,
-							width:`${50}px`,
-							fontSize:`${140}%`,
-							outline:`1px solid black`,
-						}}>
-							<span style={{paddingBottom:`2px`,}}>
-								{canvasNode.icon}
-							</span>
-						</div>
-					}
-					{
-						__x
-						&& <div style={{
-							display:`flex`,
-							alignItems:`center`, justifyContent:`center`,
-							//outline:`1px solid black`,
-							width:`150px`,
-							height:`100%`,
-							outline:`1px solid black`,
-						}}>
-							<span style={{
-								outline:`2px dashed black`,
-								fontSize:`${90}%`,
-								paddingBottom:`${1}px`,
-								paddingRight:`${((canvasNode.icon)?scale.unit:0)/6}px`,
-								margin:`${0}px`
-							}}>
-								{
-									__o
-									||(
-										__x
-										&& <span style={{
-											pointerEvents:`none`,
-											fontWeight:`bold`,
-										}}>
-											{canvasNode.text}
-										</span>
-									)
-									||(
-										__x
-										&& <textarea
-											style={{
-												resize:`none`,
-												overflow:`hidden`,
-											}}
-											rows={1}
-											cols={8}
-											onChange={(e)=>{
-												//textInputValueΔ(e.target.value)
-												//textChangedΔ(true)
-											}}
-										/>
-									)
-								}
-							</span>
-						</div>
-					}
-
-				</div>
+				__x
+				&& canvasNode
+				&& <Node proxyNode={proxyNode( canvasNode, 3+(3*3)/4, 1+(1*1)/4 )} inHeader={true}/>
 			}
-			
-
-		</div>
-	</>)}
+			<div
+				style={{
+					...baseStyle,
+					top:`0px`,
+					fontSize:`150%`,
+					display:`flex`,
+				}}
+			/>
+		</>)
+	}
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 

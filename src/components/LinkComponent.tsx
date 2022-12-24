@@ -12,7 +12,7 @@ export default function Link({linkID}:any){
     ...linkMaster.nodes.target,
     length:linkMaster.length,
     position:linkMaster.position,
-    hasCanvas:linkMaster.hasCanvas,
+    canTravel:linkMaster.canTravel,
     linkMaster:linkMaster.id
   }
 

@@ -87,7 +87,7 @@ export default function Canvas(){
 				nodes:[canvasID.toString(), nodeNewID],
 				position:{x:placeX,y:placeY,},
 				length:giveCanvas?{x:3,y:1,}:{x:6,y:2,},
-				hasCanvas:giveCanvas,
+				canTravel:giveCanvas,
 			})
 		})
 

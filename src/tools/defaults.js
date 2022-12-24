@@ -117,7 +117,7 @@ export const defaultLinks = [
 			x:3,
 			y:3,
 		},
-		hasCanvas:true,
+		canTravel:true,
 	},
 	{
 		id:"L 1",
@@ -134,7 +134,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 2",
@@ -151,7 +151,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 3",
@@ -168,7 +168,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 4",
@@ -185,7 +185,7 @@ export const defaultLinks = [
 			x: 3,
 			y: 1,
 		},
-		hasCanvas:true,
+		canTravel:true,
 	},
 	{
 		id:"L 5",
@@ -202,7 +202,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 6",
@@ -219,7 +219,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 7",
@@ -236,7 +236,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 8",
@@ -253,7 +253,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 	{
 		id:"L 9",
@@ -270,7 +270,7 @@ export const defaultLinks = [
 			x: 6,
 			y: 2,
 		},
-		hasCanvas:false,
+		canTravel:false,
 	},
 ]
   
