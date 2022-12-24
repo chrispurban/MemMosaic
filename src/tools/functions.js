@@ -52,6 +52,7 @@ export function resetApp(){
 	localStorage("nodes", defaultNodes)
 	localStorage("links", defaultLinks)
 	localStorage("canvas", "N 0");
+	localStorage.remove("lastDownload")
 	//localStorage("pocket", null);
 	console.error("resetting...")
 	signOut()
