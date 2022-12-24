@@ -3,31 +3,14 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import localStorage from "store2";
 
-
-import { __x, __o } from '../tools/defaults';
-import { resetApp } from '../tools/functions';
 import { trpc } from "../utils/trpc";
 
 import dynamic from "next/dynamic";
-const Spine = dynamic(() => import("../components/SpineComponent"), { ssr: false });
-
+const Spine = dynamic(() => import("../components/SpineComponent"), { ssr: false }); // turn ssr back on later, push down to canvas
 
 const Home: NextPage = () => {
   //const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
-
-  let currentRelease = new Date(`2022-12-16T02:00:00.450Z`)
-  if(!localStorage("lastDownload")){
-    localStorage("lastDownload", new Date)
-  }
-  else{
-    let lastDownload = new Date(localStorage("lastDownload"))
-    if(lastDownload <= currentRelease){ // in possession of an outdated version
-      resetApp()
-      localStorage("lastDownload", new Date)
-    }
-  }
 
   return (
     <>
