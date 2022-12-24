@@ -406,7 +406,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 						>
 							<div
 								style={{ // extra layer split out to deal with outline not switching fast enough
-									lineHeight:`${proxyNode.hasCanvas?100:133}%`,
+									lineHeight:`${proxyNode.hasCanvas?(onCanvas?150:100):133}%`,
 									display:`flex`, flexDirection:`row`,
 									outline:onCanvas?undefined:`1px solid ${recolor(proxyNode.color,{lum:(proxyNode.hasCanvas?-5:+5)-15,sat:null,hue:null})}`,
 									backgroundColor:onCanvas?undefined:recolor(proxyNode.color,{lum:(proxyNode.hasCanvas?-5:+5)-0,sat:null,hue:null}),
