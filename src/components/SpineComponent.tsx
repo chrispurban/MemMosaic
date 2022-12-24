@@ -33,7 +33,7 @@ if(
 	resetApp()
 }
 else{
-	const currentRelease = new Date(`2022-12-24T02:45:00.000Z`)
+	const currentRelease = new Date(`${process.env.NEXT_PUBLIC_LATEST_RELEASE}`)
 	const lastDownload = new Date(localStorage("lastDownload"))
 	console.log("time of last download:", lastDownload)
 	if(lastDownload <= currentRelease){ 
