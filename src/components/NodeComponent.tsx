@@ -130,9 +130,13 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	function onStart(event:any, data:any){ //console.log(`${proxyNode.id} start detected`)
-		if(selectedNodeID!==proxyNode.id && !event.altKey){// not coming from a duplicate
+		if(
+			__x
+			&& selectedNodeID!==proxyNode.id // not coming from a duplicate
+			&& !event.altKey // not trying to reset the app
+			&& !(inPocket && !event.ctrlKey) // not a pocket node unless trying to edit
+		){
 			selectedNodeIDΔ(proxyNode.id)
-			
 		}
 		if(textRef.current && textRef.current.contains(event.target)){ // don't drag if clicking textbox
 			return(false)
@@ -142,7 +146,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	function onDrag(event:any ,data:any){ //console.log(`${proxyNode.id} drag detected`)
-		if(dragEnabled && !onCanvas){
+		if(dragEnabled && !onCanvas && !(inPocket && proxyNode.id == canvasID)){
 			dragActiveΔ(true)
 		}
 		else{
@@ -350,7 +354,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 		{
 			__x
 			&& proxyNode.id
-			&& (!inPocket || view)
+			&& (!inPocket || view) // add onCanvas
 			&& <div
 				ref={componentRef}
 				style={{
@@ -384,7 +388,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 						}
 					}
 					onStart={onStart} onDrag={onDrag} onStop={onStop}
-					disabled={!dragEnabled || (inPocket && proxyNode.id == canvasID)}
+					disabled={false}
 				>
 					<div
 						ref={draggableRef} // used under advisement of Draggable package developer to handle FindDOMNode deprecation
