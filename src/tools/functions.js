@@ -49,10 +49,11 @@ export function recolor( hslString, {hue,sat,lum}={} ){
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 export function resetApp(){
+	const now = new Date
 	localStorage("nodes", defaultNodes)
 	localStorage("links", defaultLinks)
 	localStorage("canvas", "N 0");
-	localStorage.remove("lastDownload")
+	localStorage("lastDownload", now)
 	//localStorage("pocket", null);
 	console.error("resetting...")
 	signOut()

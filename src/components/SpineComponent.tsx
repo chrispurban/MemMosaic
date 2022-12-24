@@ -19,33 +19,30 @@ import Canvas from "./CanvasComponent";
 import Report from "./ReportComponent";
 import Sidebar from './SidebarComponent';
 
+const now = new Date
+console.log(`The time is now`, now.toISOString())
+
 
 if(
-	__o // protection against having nothing to read
+	__o // protection against an outdated app version or having nothing to read
 	||(!localStorage("canvas"))
 	||(!localStorage("links"))
 	||(!localStorage("nodes"))
+	||(!localStorage("lastDownload"))
 ){
 	resetApp()
 }
-
-
-const now = new Date
-console.log(`The time is now`, now.toISOString())
-console.error(`Secret tip: to reset local storage, hold ALT and double-click the top bar.`)
-
-
-const currentRelease = new Date(`2022-12-24T02:20:00.000Z`)
-if(!localStorage("lastDownload")){
-	localStorage("lastDownload", now)
-}
 else{
+	const currentRelease = new Date(`2022-12-24T02:45:00.000Z`)
 	const lastDownload = new Date(localStorage("lastDownload"))
-	if(lastDownload <= currentRelease){ // in possession of an outdated version		
+	console.log("time of last download:", lastDownload)
+	if(lastDownload <= currentRelease){ 
+		console.log("in possession of an outdated version")
 		resetApp()
 	}
 }
 
+console.error(`Secret tip: to reset local storage, hold ALT and double-click the top bar.`)
 
 export default function Spine(props:any){
 
