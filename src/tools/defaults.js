@@ -93,7 +93,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 8",
-		text: `Clicking the top bar will always send you to the Origin topic while storing a return link`,
+		text: `Clicking the top-left button will send you to the Origin topic while storing a return link`,
 		icon: null,
 		links: [
 			"L 8"
