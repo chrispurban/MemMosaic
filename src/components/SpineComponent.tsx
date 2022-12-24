@@ -40,7 +40,7 @@ if(!localStorage("lastDownload")){
 	localStorage("lastDownload", now)
 }
 else{
-	let lastDownload = new Date(localStorage("lastDownload"))
+	const lastDownload = new Date(localStorage("lastDownload"))
 	if(lastDownload <= currentRelease){ // in possession of an outdated version		
 		resetApp()
 	}
