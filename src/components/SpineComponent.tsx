@@ -19,23 +19,39 @@ import Canvas from "./CanvasComponent";
 import Report from "./ReportComponent";
 import Sidebar from './SidebarComponent';
 
+
+if(
+	__o // protection against having nothing to read
+	||(!localStorage("canvas"))
+	||(!localStorage("links"))
+	||(!localStorage("nodes"))
+){
+	resetApp()
+}
+
+
+const now = new Date
+console.log(`The time is now`, now.toISOString())
 console.error(`Secret tip: to reset local storage, hold ALT and double-click the top bar.`)
 
-export default function Spine(props:any){
 
-	if(
-		__o // protection against having nothing to read
-		||(!localStorage("canvas"))
-		||(!localStorage("links"))
-		||(!localStorage("nodes"))
-	){
+const currentRelease = new Date(`2022-12-24T02:20:00.000Z`)
+if(!localStorage("lastDownload")){
+	localStorage("lastDownload", now)
+}
+else{
+	let lastDownload = new Date(localStorage("lastDownload"))
+	if(lastDownload <= currentRelease){ // in possession of an outdated version		
 		resetApp()
 	}
+}
+
+
+export default function Spine(props:any){
 
 	const canvasID = useRecoilValue(canvasID_atom)
 	const selectedNodeIDΔ = useSetRecoilState(selectedNodeID_atom)
 	useEffect(()=>{selectedNodeIDΔ(null)},[canvasID]);
-
 
 	return(
 		<>
