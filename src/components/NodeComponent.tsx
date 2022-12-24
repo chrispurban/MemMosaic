@@ -1,5 +1,5 @@
 import { __x, __o, } from '../tools/defaults';
-import { useInterval, recolor, } from '../tools/functions';
+import { useInterval, recolor, resetApp, } from '../tools/functions';
 import {
   scale_atom,
   view_atom,
@@ -130,7 +130,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	function onStart(event:any, data:any){ //console.log(`${proxyNode.id} start detected`)
-		if(selectedNodeID!==proxyNode.id){// not coming from a duplicate
+		if(selectedNodeID!==proxyNode.id && !event.altKey){// not coming from a duplicate
 			selectedNodeIDΔ(proxyNode.id)
 			
 		}
@@ -142,7 +142,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	function onDrag(event:any ,data:any){ //console.log(`${proxyNode.id} drag detected`)
-		if(dragEnabled){
+		if(dragEnabled && !onCanvas){
 			dragActiveΔ(true)
 		}
 		else{
@@ -208,11 +208,11 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 
 		}
 		else if(dragEnabled){ // did not drag
-			if(event.ctrlKey || !proxyNode.hasCanvas){ // trying to edit
+			if(event.ctrlKey || !proxyNode.hasCanvas || (onCanvas && !event.altKey)){ // trying to edit
 				textEditableΔ(true)
 			}
 			else if(!textEditable){
-				if(inPocket || onCanvas){pocketIDΔ(canvasID)} // navigating from pocket exchanges with destination
+				if(inPocket || (onCanvas && !event.altKey)){pocketIDΔ(canvasID)} // navigating from pocket exchanges with destination
 				canvasIDΔ(proxyNode.id)
 			}
 		}
@@ -364,6 +364,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 					// text goes 1 to 2, link goes 3 to 6, inPocket link 5 to 8
 					// still needs work; editing should come above all
 				}}
+				onDoubleClick={(e)=>{if(e.altKey && onCanvas){resetApp()}}}
 			>
 				<Draggable
 					nodeRef={draggableRef}
@@ -395,7 +396,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 							style={{
 								position:`absolute`,
 								transform:"translate(-50%, -50%)",
-								outline:(selectedNodeID==proxyNode.id)?`2px solid gold`:undefined,
+								outline:(selectedNodeID==proxyNode.id && !onCanvas)?`2px solid gold`:undefined,
 							}}
 							className="node"
 						>
@@ -403,8 +404,8 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 								style={{ // extra layer split out to deal with outline not switching fast enough
 									lineHeight:`${proxyNode.hasCanvas?100:133}%`,
 									display:`flex`, flexDirection:`row`,
-									outline:`1px solid ${recolor(proxyNode.color,{lum:(proxyNode.hasCanvas?-5:+5)-15,sat:null,hue:null})}`,
-									backgroundColor:recolor(proxyNode.color,{lum:(proxyNode.hasCanvas?-5:+5)-0,sat:null,hue:null}),
+									outline:onCanvas?undefined:`1px solid ${recolor(proxyNode.color,{lum:(proxyNode.hasCanvas?-5:+5)-15,sat:null,hue:null})}`,
+									backgroundColor:onCanvas?undefined:recolor(proxyNode.color,{lum:(proxyNode.hasCanvas?-5:+5)-0,sat:null,hue:null}),
 									// centering text must have been set somewhere else in the old CSS
 								 }}
 							>
@@ -415,10 +416,10 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 										display:`flex`,
 										alignItems:`center`, justifyContent:`center`,
 										width:`${scale.unit*(onCanvas?(1+1**2/4):1)}px`,
-										fontSize:`${140}%`,
+										fontSize:`${onCanvas?200:140}%`,
 									}}>
 										<span style={{
-											paddingBottom:`3px`,
+											paddingBottom:`${onCanvas?6:3}px`,
 											}}>
 											{proxyNode.icon}
 										</span>
@@ -436,7 +437,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 										height:`${scale.unit*(proxyNode.length.y)}px`,
 									}}>
 										<span style={{
-											fontSize:`${proxyNode.hasCanvas?90:100}%`,
+											fontSize:`${onCanvas?140:proxyNode.hasCanvas?90:100}%`,
 											paddingBottom:`${proxyNode?1:1}px`,
 											paddingRight:`${((proxyNode.icon && proxyNode.hasCanvas)?scale.unit:0)/6}px`,
 											margin:`${proxyNode.hasCanvas?0:(scale.unit/6)}px`,
@@ -460,6 +461,7 @@ export default function Node({proxyNode, inPocket, onCanvas}:any){
 														style={{
 															resize:`none`,
 															overflow:proxyNode.hasCanvas?`hidden`:undefined,
+															fontSize:onCanvas?`110%`:undefined,
 														}}
 														rows={proxyNode.hasCanvas?1:4}
 														cols={proxyNode.hasCanvas?8:29}

@@ -8,7 +8,6 @@ import {
 	node_atom,
 	link_atom,
 	pocketID_atom,
-	sidebarExpand_atom,
 } from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import {
@@ -73,7 +72,7 @@ export default function Frame(){
 
 	function FrameTop(){return(<>
 		{
-			__o
+			__x
 			&& canvasNode
 			&& <Node proxyNode={proxyNode( canvasNode, 3+(3*3)/4, 1+(1*1)/4 )} onCanvas={true}/>
 		}
@@ -91,7 +90,7 @@ export default function Frame(){
 					&& !(e.altKey)
 				){
 					if(
-						false
+						true
 						//e.ctrlKey
 					){
 						//editingTextΔ(true);
@@ -122,76 +121,82 @@ export default function Frame(){
 			}}
 		>
 
-			
-
-			<div
-				style={{
-					display:`flex`, flexDirection:`row`,
-					width:`200px`, height:`50px`,
-					lineHeight:`${100}%`,
-				}}
-			>
-				{
-					__x
-					&& canvasNode.icon
-					&& <div style={{
-						display:`flex`,
-						alignItems:`center`, justifyContent:`center`,
-						width:`${50}px`,
-						fontSize:`${140}%`,
-					}}>
-						<span style={{paddingBottom:`2px`,}}>
-							{canvasNode.icon}
-						</span>
-					</div>
-				}
-				{
-					__x
-					&& <div style={{
-						display:`flex`,
-						alignItems:`center`, justifyContent:`center`,
-						//outline:`1px solid black`,
-						width:`150px`,
-						height:`100%`,
-					}}>
-						<span style={{
-							fontSize:`${90}%`,
-							paddingBottom:`${1}px`,
-							paddingRight:`${((canvasNode.icon)?scale.unit:0)/6}px`,
-							margin:`${0}px`
+			{
+				__o
+				&& <div
+					style={{
+						display:`flex`, flexDirection:`row`,
+						width:`200px`, height:`50px`,
+						lineHeight:`${100}%`,
+						outline:`1px solid black`,
+					}}
+				>
+					{
+						__x
+						&& canvasNode.icon
+						&& <div style={{
+							display:`flex`,
+							alignItems:`center`, justifyContent:`center`,
+							width:`${50}px`,
+							fontSize:`${140}%`,
+							outline:`1px solid black`,
 						}}>
-							{
-								__o
-								||(
-									__x
-									&& <span style={{
-										pointerEvents:`none`,
-										fontWeight:`bold`,
-									}}>
-										{canvasNode.text}
-									</span>
-								)
-								||(
-									__x
-									&& <textarea
-										style={{
-											resize:`none`,
-											overflow:`hidden`,
-										}}
-										rows={1}
-										cols={8}
-										onChange={(e)=>{
-											//textInputValueΔ(e.target.value)
-											//textChangedΔ(true)
-										}}
-									/>
-								)
-							}
-						</span>
-					</div>
-				}
+							<span style={{paddingBottom:`2px`,}}>
+								{canvasNode.icon}
+							</span>
+						</div>
+					}
+					{
+						__x
+						&& <div style={{
+							display:`flex`,
+							alignItems:`center`, justifyContent:`center`,
+							//outline:`1px solid black`,
+							width:`150px`,
+							height:`100%`,
+							outline:`1px solid black`,
+						}}>
+							<span style={{
+								outline:`2px dashed black`,
+								fontSize:`${90}%`,
+								paddingBottom:`${1}px`,
+								paddingRight:`${((canvasNode.icon)?scale.unit:0)/6}px`,
+								margin:`${0}px`
+							}}>
+								{
+									__o
+									||(
+										__x
+										&& <span style={{
+											pointerEvents:`none`,
+											fontWeight:`bold`,
+										}}>
+											{canvasNode.text}
+										</span>
+									)
+									||(
+										__x
+										&& <textarea
+											style={{
+												resize:`none`,
+												overflow:`hidden`,
+											}}
+											rows={1}
+											cols={8}
+											onChange={(e)=>{
+												//textInputValueΔ(e.target.value)
+												//textChangedΔ(true)
+											}}
+										/>
+									)
+								}
+							</span>
+						</div>
+					}
 
-			</div>
+				</div>
+			}
+			
 
 		</div>
 	</>)}
@@ -204,10 +209,10 @@ export default function Frame(){
 		// apparently this mixing with pocketID doesn't cause a problem though
 		// possibly a mounting issue where any property in here would ensure it's updated
 		const selectedNodeID = useRecoilValue(selectedNodeID_atom);
-		const [ expanded, expandedΔ ] = useRecoilState(sidebarExpand_atom)
+		//const [ expanded, expandedΔ ] = useRecoilState(sidebarExpand_atom)
 		useEffect(()=>{
 			const handleKey = (e:any)=>{
-				if(pocketID && !selectedNodeID && !expanded){
+				if(pocketID && !selectedNodeID /*&& !expanded*/){
 					switch(e.key){
 						case "Delete":
 						case "Escape":
@@ -226,7 +231,7 @@ export default function Frame(){
 		},[
 			pocketID,
 			selectedNodeID,
-			expanded,
+			//expanded,
 		]);
 		
 		return(<>

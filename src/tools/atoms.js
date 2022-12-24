@@ -25,8 +25,8 @@ export const view_atom = atom({
 
 /////////////////////////////////////////////////////////////////////
 
-export const sidebarExpand_atom = atom({
-	key:"sidebarExpand_atom",
+export const pocketBlocker_atom = atom({
+	key:"pocketBlocker_atom",
 	default:false,
 	effects:[
 		({onSet})=>{ onSet( (changedValues)=>{
