@@ -360,8 +360,15 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 				style={{
 					position:'absolute',
 					left:'50vw', top:'50vh',
-					width:'0px', height:'0px',
+
+					width:'100vw', height:'100vh',
+					display:`flex`,
+					justifyContent:`center`,
+					alignItems:`center`,
+					overflow:`hidden`,
+					pointerEvents:`none`,
 					transform:"translate(-50%, -50%)",
+					
 					userSelect:`none`,
 					textAlign:`center`,
 					zIndex:((proxyNode.canTravel?3:1) * (1+(proxyNode.id==selectedNodeID?1:0))) + ((inPocket || inHeader)?2:0),
@@ -393,6 +400,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 					<div
 						ref={draggableRef} // used under advisement of Draggable package developer to handle FindDOMNode deprecation
 						style={{
+							pointerEvents:`auto`,
 							//position:`relative`,
 						}}
 					>
@@ -423,7 +431,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 										fontSize:`${inHeader?200:140}%`,
 									}}>
 										<span style={{
-											paddingBottom:`${inHeader?3:3}px`,
+											paddingBottom:`${inHeader?4:2}px`,
 											}}>
 											{proxyNode.icon}
 										</span>
