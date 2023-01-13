@@ -51,11 +51,17 @@ export default function Spine(props:any){
 	useEffect(()=>{selectedNodeIDΔ(null)},[canvasID]);
 
 	return(
-		<>
+		<div
+			style={{
+				position:'relative',
+				width:'100vw', maxWidth:'100svw',
+				height:'100vh', maxHeight:'100svh',
+			}}
+		>
 			<Sidebar/>
 			<Frame/>
 			<Canvas/>
 			<Report/>
-		</>
+		</div>
 	)
 }

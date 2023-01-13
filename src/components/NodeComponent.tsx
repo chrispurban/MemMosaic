@@ -359,15 +359,15 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 				ref={componentRef}
 				style={{
 					position:'absolute',
-					left:'50vw', top:'50vh',
+					left:'50%', top:'50%',
+					transform:"translate(-50%, -50%)",
+					width:'100%', height:'100%',
 
-					width:'100vw', height:'100vh',
 					display:`flex`,
 					justifyContent:`center`,
 					alignItems:`center`,
 					overflow:`hidden`,
 					pointerEvents:`none`,
-					transform:"translate(-50%, -50%)",
 					
 					userSelect:`none`,
 					textAlign:`center`,

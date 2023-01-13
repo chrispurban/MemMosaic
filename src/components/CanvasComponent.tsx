@@ -124,9 +124,8 @@ export default function Canvas(){
 		
 			<div
 				style={{
-					margin:'auto',
-					height:'100vh',
-					width:'100vw',
+					position:'relative',
+					height:'100%', width:'100%',
 					backgroundColor:node.color,
 				}}
 				className="canvas"
