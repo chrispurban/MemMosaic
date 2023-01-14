@@ -486,7 +486,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 															fontSize:`100%`,
 														}}
 														rows={proxyNode.canTravel?2:4}
-														cols={proxyNode.canTravel?(inHeader?8:7):28}
+														cols={proxyNode.canTravel?(inHeader?12:8):28}
 														ref={textRef}
 														value={textInputValue}
 														onKeyDown={(e)=>{
