@@ -11,6 +11,7 @@ import {
 	canvasID_atom,
 	pocketID_atom,
 	node_atom,
+	extra_atom,
 } from "../tools/atoms";
 import { useDeviceSelectors } from 'react-device-detect';
 
@@ -18,6 +19,7 @@ import { useDeviceSelectors } from 'react-device-detect';
 
 export default function Sidebar(){
 
+	const [ extra, extraΔ ] = useRecoilState(extra_atom)
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
 	const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
@@ -166,15 +168,18 @@ export default function Sidebar(){
 				<div>
 					They are not currently connected to anything
 				</div>
-				<div style={{
+				{
+					__x
+					&& extra
+					&& <pre style={{
 					overflowY:`auto`,
 					overflowX:`hidden`,
-				}}>
-					<pre>
+					}}>
 						{JSON.stringify(selectors, null, '\r')}
 
 					</pre>
-				</div>
+				}
+				
 			</>
 		}/>
 
