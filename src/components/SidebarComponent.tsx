@@ -12,7 +12,7 @@ import {
 	pocketID_atom,
 	node_atom,
 } from "../tools/atoms";
-import { isMobile } from 'react-device-detect';
+import { useDeviceSelectors } from 'react-device-detect';
 
 /*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
@@ -21,6 +21,12 @@ export default function Sidebar(){
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
 	const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
+
+	const [selectors, data] = useDeviceSelectors(window.navigator.userAgent)
+
+	const { isMobile } = selectors
+
+	console.log(selectors)
 
 	/*
 	const {data: sessionData} = useSession()
@@ -73,7 +79,7 @@ export default function Sidebar(){
 					right:!left?`${expanded?0:10}px`:undefined,
 					left:left?`${expanded?0:10}px`:undefined,
 					top:`${expanded?0:10}px`,
-					...(expanded?{width:'260px', height:`100vh`, }:{}),
+					...(expanded?{width:'260px', height:`100%`, }:{}),
 					zIndex:'1000',
 					padding:`${expanded?10:0}px`,
 					display:`flex`,
@@ -114,7 +120,7 @@ export default function Sidebar(){
 				>
 					<span style={{
 						backgroundColor:isMobile?'black':undefined,
-						paddingTop:`${isMobile?9:0}px`,
+						paddingTop:`${isMobile?6:0}px`,
 						paddingBottom:`${isMobile?0:3}px`,
 						fontSize:`150%`,
 					}}>
@@ -129,6 +135,7 @@ export default function Sidebar(){
 							display:`flex`,
 							flexDirection:`column`,
 							gap:`20px`,
+							height:`calc(100% - 60px)`,
 						}}
 					>
 						{content}
@@ -162,6 +169,15 @@ export default function Sidebar(){
 				</div>
 				<div>
 					They are not currently connected to anything
+				</div>
+				<div style={{
+					overflowY:`auto`,
+					overflowX:`hidden`,
+				}}>
+					<pre>
+						{JSON.stringify(selectors, null, '\r')}
+
+					</pre>
 				</div>
 			</>
 		}/>
