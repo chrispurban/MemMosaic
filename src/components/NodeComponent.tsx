@@ -12,7 +12,7 @@ import {
 } from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import { memo, useState, useEffect, useRef, } from 'react';
-import { isMobile } from 'react-device-detect';
+import { useDeviceSelectors } from 'react-device-detect';
 
 //import './../App.scss';
 
@@ -28,6 +28,9 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 	const atlas = useRecoilValue(atlas_selector);
 	const scale = useRecoilValue(scale_atom);
 	const view = useRecoilValue(view_atom);
+
+	const [selectors, data] = useDeviceSelectors(window.navigator.userAgent)
+	const { isWindows } = selectors
 
 	const [ selectedNodeID, selectedNodeIDΔ ] = useRecoilState(selectedNodeID_atom);
   	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom);
@@ -432,7 +435,8 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 										fontSize:`${inHeader?200:140}%`,
 									}}>
 										<span style={{
-											paddingBottom:`${isMobile?0:(inHeader?4:2)}px`,
+											paddingTop:`${isWindows?0:(inHeader?2:0)}px`,
+											paddingBottom:`${isWindows?(inHeader?4:2):0}px`,
 											}}>
 											{proxyNode.icon}
 										</span>
