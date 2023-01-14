@@ -13,18 +13,6 @@ import localStorage from "store2";
 
 /////////////////////////////////////////////////////////////////////
 
-export const extra_atom = atom({
-	key:"extra_atom",
-	default:false,
-	effects:[
-		({onSet})=>{ onSet( (changedValues)=>{
-		//console.log(`measured`, changedValues)
-		} ); }
-	],
-});
-
-/////////////////////////////////////////////////////////////////////
-
 export const view_atom = atom({
 	key:"view_atom",
 	default:{pxAbsolute:0, XpxUnits:0, pxExtra:0},

@@ -5,7 +5,6 @@ import { useInterval, recolor, } from '../tools/functions';
 import { useRecoilState } from 'recoil';
 import {
 	canvasID_atom,
-	extra_atom,
 	node_atom,
 } from "../tools/atoms";
 
@@ -21,7 +20,6 @@ export default function Login(){
 
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
-	const [ extra, extraΔ ] = useRecoilState(extra_atom)
 	const [ formEmail, formEmailΔ ] = useState("");
 
 	const buttonRef = useRef<HTMLButtonElement>(null);
@@ -45,9 +43,6 @@ export default function Login(){
 						redirect: false
 					})	
 					console.error(`login with ${formEmail} successful`)
-					if(formEmail == 'chrispurban@gmail.com'){
-						extraΔ(true)
-					}
 				}
 				catch (x){
 					console.error(`login with ${formEmail} failed`)

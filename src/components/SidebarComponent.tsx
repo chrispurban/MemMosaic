@@ -11,7 +11,6 @@ import {
 	canvasID_atom,
 	pocketID_atom,
 	node_atom,
-	extra_atom,
 } from "../tools/atoms";
 import { useDeviceSelectors } from 'react-device-detect';
 
@@ -19,13 +18,14 @@ import { useDeviceSelectors } from 'react-device-detect';
 
 export default function Sidebar(){
 
-	const [ extra, extraΔ ] = useRecoilState(extra_atom)
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
 	const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
 
 	const [selectors, data] = useDeviceSelectors(window.navigator.userAgent)
 	const { isWindows } = selectors
+
+	const user = useSession().data?.user?.email
 
 	/*
 	const {data: sessionData} = useSession()
@@ -170,7 +170,7 @@ export default function Sidebar(){
 				</div>
 				{
 					__x
-					&& extra
+					&& user == `chrispurban@gmail.com`
 					&& <pre style={{
 					overflowY:`auto`,
 					overflowX:`hidden`,
