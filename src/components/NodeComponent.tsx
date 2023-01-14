@@ -12,6 +12,7 @@ import {
 } from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import { memo, useState, useEffect, useRef, } from 'react';
+import { isMobile } from 'react-device-detect';
 
 //import './../App.scss';
 
@@ -431,7 +432,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 										fontSize:`${inHeader?200:140}%`,
 									}}>
 										<span style={{
-											paddingBottom:`${inHeader?4:2}px`,
+											paddingBottom:`${isMobile?0:(inHeader?4:2)}px`,
 											}}>
 											{proxyNode.icon}
 										</span>
