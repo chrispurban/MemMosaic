@@ -75,7 +75,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 6",
-		text: `The bottom bar can copy any link dragged in (until refresh or ESC) and out again (permanent)`,
+		text: `The bottom bar can copy any link dragged in (until refresh or ESC) or out again (permanent)`,
 		icon: null,
 		links: [
 			"L 6"
@@ -84,7 +84,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 7",
-		text: `Holding CTRL while clicking will create a topic instead of a note, or edit the link instead of visit`,
+		text: `Holding CTRL while clicking will create a topic instead of a note, or edit its link instead of visit`,
 		icon: null,
 		links: [
 			"L 7"
