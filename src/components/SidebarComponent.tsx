@@ -113,8 +113,8 @@ export default function Sidebar(){
 					}}
 				>
 					<span style={{
-						backgroundColor:'black',
-						paddingTop:`${isMobile?6:0}px`,
+						backgroundColor:isMobile?'black':undefined,
+						paddingTop:`${isMobile?9:0}px`,
 						paddingBottom:`${isMobile?0:3}px`,
 						fontSize:`150%`,
 					}}>
