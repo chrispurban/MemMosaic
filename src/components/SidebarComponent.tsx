@@ -116,7 +116,7 @@ export default function Sidebar(){
 					}}
 				>
 					<span style={{
-						paddingTop:`${isWindows?0:3}px`,
+						paddingTop:`${isWindows?0:2}px`,
 						paddingBottom:`${isWindows?3:0}px`,
 						fontSize:`175%`,
 					}}>

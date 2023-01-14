@@ -455,8 +455,8 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 									}}>
 										<span style={{
 											fontSize:`${inHeader?140:proxyNode.canTravel?90:100}%`,
-											paddingTop:`${isWindows?0:(inHeader?2:0)}px`,
-											paddingBottom:`${1}px`,
+											paddingTop:`${isWindows?0:(inHeader?3:0)}px`,
+											paddingBottom:`${isWindows?1:0}px`,
 											paddingRight:`${((proxyNode.icon && (proxyNode.canTravel))?(inHeader?2:1)*scale.unit:0)/6}px`,
 											margin:`${proxyNode.canTravel?0:(scale.unit/6)}px`,
 										}}>
