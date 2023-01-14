@@ -24,9 +24,7 @@ export default function Sidebar(){
 
 	const [selectors, data] = useDeviceSelectors(window.navigator.userAgent)
 
-	const { isMobile } = selectors
-
-	console.log(selectors)
+	const { isWindows } = selectors
 
 	/*
 	const {data: sessionData} = useSession()
@@ -119,9 +117,8 @@ export default function Sidebar(){
 					}}
 				>
 					<span style={{
-						backgroundColor:isMobile?'black':undefined,
-						paddingTop:`${isMobile?6:0}px`,
-						paddingBottom:`${isMobile?0:3}px`,
+						paddingTop:`${isWindows?0:3}px`,
+						paddingBottom:`${isWindows?3:0}px`,
 						fontSize:`150%`,
 					}}>
 						{left?"🧿":"👤"}
