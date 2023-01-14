@@ -92,9 +92,6 @@ export default function Sidebar(){
 						alignItems:`center`, justifyContent:`center`,
 						textAlign:`center`,
 						border:`0px`,
-						paddingTop:`${isMobile?3:0}px`,
-						paddingBottom:`${isMobile?0:3}px`,
-						fontSize:`150%`,
 						backgroundColor:recolor(node.color, {hue:0, lum:(-20), sat:0}),
 						outline:`1px solid ${recolor(node.color, {lum:(expanded?-50:-40),hue:0,sat:0})}`,
 						userSelect:`none`,
@@ -115,7 +112,14 @@ export default function Sidebar(){
 						e.stopPropagation()
 					}}
 				>
-					{left?"🧿":"👤"}
+					<span style={{
+						backgroundColor:'black',
+						paddingTop:`${isMobile?6:0}px`,
+						paddingBottom:`${isMobile?0:3}px`,
+						fontSize:`150%`,
+					}}>
+						{left?"🧿":"👤"}
+					</span>
 				</button>
 				{
 					__x
