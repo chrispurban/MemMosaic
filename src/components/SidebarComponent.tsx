@@ -23,7 +23,6 @@ export default function Sidebar(){
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
 
 	const [selectors, data] = useDeviceSelectors(window.navigator.userAgent)
-
 	const { isWindows } = selectors
 
 	/*
@@ -117,9 +116,9 @@ export default function Sidebar(){
 					}}
 				>
 					<span style={{
-						paddingTop:`${isWindows?0:0}px`,
+						paddingTop:`${isWindows?0:3}px`,
 						paddingBottom:`${isWindows?3:0}px`,
-						fontSize:`150%`,
+						fontSize:`175%`,
 					}}>
 						{left?"🧿":"👤"}
 					</span>

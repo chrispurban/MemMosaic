@@ -432,11 +432,11 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 										display:`flex`,
 										alignItems:`center`, justifyContent:`center`,
 										width:`${scale.unit*(inHeader?(1+1**2/4):1)}px`,
-										fontSize:`${inHeader?200:140}%`,
+										fontSize:`${inHeader?200:150}%`,
 									}}>
 										<span style={{
-											paddingTop:`${isWindows?0:(inHeader?2:0)}px`,
-											paddingBottom:`${isWindows?(inHeader?4:2):0}px`,
+											paddingTop:`${isWindows?0:(inHeader?3:0)}px`,
+											paddingBottom:`${isWindows?(inHeader?4:3):0}px`,
 											}}>
 											{proxyNode.icon}
 										</span>
