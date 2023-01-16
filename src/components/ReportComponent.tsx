@@ -30,6 +30,7 @@ import * as localStorage from 'store2';
 export default function Report(){
 
   const [ view, viewΔ ] = useRecoilState(view_atom);
+  const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom);
   const [ scale, scaleΔ ] = useRecoilState(scale_atom);
   const selectedNodeID = useRecoilValue(selectedNodeID_atom);
   const atlas = useRecoilValue(atlas_selector);
@@ -77,7 +78,7 @@ export default function Report(){
     const handleKey = (e:any)=>{
       if(e.key == "Home"){
         //console.clear()
-        //console.log(`atlas`,atlas)
+        console.log(`pocketID`,pocketID)
         //console.log(`selected`,selectedNodeID)
         //console.log(`view`,view)
         //console.log(`width`,window.outerWidth)
@@ -91,6 +92,7 @@ export default function Report(){
     atlas,
     selectedNodeID,
     view,
+    pocketID_atom
   ])
 
   //////////////////////////////////////////////////////////////////////////////////////////////

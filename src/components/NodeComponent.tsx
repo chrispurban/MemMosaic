@@ -103,7 +103,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 		})
 		canvasNodeΔ((n:any)=>{ return{...n,links:[...n.links, linkNewID]} })
 		pocketNodeΔ((n:any)=>{ return{...n,links:[...n.links, linkNewID]} })
-		pocketIDΔ(null)
+		//pocketIDΔ(null)
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 				if(proxyNode.canTravel){pocketIDΔ(proxyNode.id)}
 			}
 			else{
-				// was dragged somewhere else
+				// was dragged somewhere else within the canvas
 				const overlapped = atlas // see if it overlapped another link
 					.filter((plot:any)=>{return (
 						__x
@@ -193,8 +193,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 						|| data.x <= Math.round(scale.unit*((plot.position.x*3)-proxyNode.length.x))
 						|| data.y <= Math.round(scale.unit*((plot.position.y*3)-proxyNode.length.y))
 					);})
-				if(overlapped){
-					// was dragged onto a link
+				if(overlapped){ // was dragged onto a link
 					pocketIDΔ(proxyNode.id)
 					canvasIDΔ(overlapped.nodes.target.id)
 				}
@@ -202,6 +201,7 @@ export default function Node({proxyNode, inPocket, inHeader}:any){
 					if(inPocket || inHeader){ // new node to clone
 						linkGeneration(data)
 						selectedNodeIDΔ(null)
+						if(!event.ctrlKey){pocketIDΔ(null)} // hold CTRL to not empty pocket, if intending to drop the link in many places
 					}
 					else{ // already existed
 						linkΔ((l:any)=>{
