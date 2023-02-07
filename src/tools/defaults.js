@@ -75,7 +75,7 @@ export const defaultNodes = [
 	},
 	{
 		id:"N 6",
-		text: `The bottom bar can copy any link dragged in (until refresh or ESC) or out again (permanent)`,
+		text: `The bottom bar can copy any link dragged in (until refresh) or out again (permanent)`,
 		icon: null,
 		links: [
 			"L 6"

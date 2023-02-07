@@ -163,10 +163,7 @@ export default function Sidebar(){
 			<>
 				<Login/>
 				<div>
-					User accounts are authenticated purely by email confirmation link
-				</div>
-				<div>
-					They are not currently connected to anything
+					User accounts are authenticated purely by email confirmation link but do not currently have other functionality attached.
 				</div>
 				{
 					__x
