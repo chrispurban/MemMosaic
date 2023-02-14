@@ -16,11 +16,12 @@ import {
 	useEffect,
 	useRef,
 } from 'react';
+import { useQuery, gql } from "@apollo/client";
 
 import Link from "./LinkComponent";
+import Note from "./NoteComponent";
 
 //import './../App.scss';
-
 //import Link from "./LinkComponent";
 
 import localStorage from 'store2';
@@ -28,19 +29,13 @@ import localStorage from 'store2';
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Canvas(){
-	
-	const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)
+
 	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
 	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
 	// probably memoization somewhere to leave other links alone when node.links is updated
 	const selectedNodeIDΔ = useSetRecoilState(selectedNodeID_atom)
 
 	const scale = useRecoilValue(scale_atom)
-
-	const [ editingText, editingTextΔ ] = useState(false);
-	const [ editingIcon, editingIconΔ ] = useState(false);
-	const [ textInputValue, textInputValueΔ ] = useState('')
-	const [ iconInputValue, iconInputValueΔ ] = useState('')
 
 	const [ sustainedInput, sustainedInputΔ ] = useState(null)
 	useInterval(
@@ -121,7 +116,6 @@ export default function Canvas(){
 
 	return(
 		<>
-		
 			<div
 				style={{
 					position:'relative',
@@ -159,7 +153,6 @@ export default function Canvas(){
 						}
 					)
 				}
-				
 			</div>
 
 		</>

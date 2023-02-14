@@ -1,10 +1,13 @@
 import { __x, __o, defaultNodes, defaultLinks } from '../tools/defaults';
 import { resetApp } from '../tools/functions';
-import {
+ import {
 	canvasID_atom,
-	selectedNodeID_atom,
 	node_atom,
- } from "../tools/atoms";
+	link_atom,
+	scale_atom,
+	selectedNodeID_atom,
+	pocketID_atom,
+} from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import {
 	memo,
@@ -16,6 +19,7 @@ import localStorage from "store2";
 
 import Frame from "./FrameComponent";
 import Canvas from "./CanvasComponent";
+import NEO_Canvas from "./NEO_CanvasComponent";
 import Report from "./ReportComponent";
 import Sidebar from './SidebarComponent';
 
@@ -50,18 +54,29 @@ export default function Spine(props:any){
 	const selectedNodeIDΔ = useSetRecoilState(selectedNodeID_atom)
 	useEffect(()=>{selectedNodeIDΔ(null)},[canvasID]);
 
-	return(
+	return(<>
+		<div
+			style={{
+				position:'relative',
+				width:'100vw', maxWidth:'100svw',
+				height:'50vh', maxHeight:'50svh',
+			}}
+			>
+			{
+				<NEO_Canvas/>
+			}
+		</div>
 		<div
 			style={{
 				position:'relative',
 				width:'100vw', maxWidth:'100svw',
 				height:'100vh', maxHeight:'100svh',
 			}}
-		>
+			>
 			<Sidebar/>
 			<Frame/>
 			<Canvas/>
 			<Report/>
 		</div>
-	)
+	</>)
 }
