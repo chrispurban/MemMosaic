@@ -12,8 +12,8 @@ const typeDefs = gql`
 			MATCH (n{uuid:$uuid})
 			RETURN n
 		""")
-		User(uuid: String): User @cypher(statement: """
-			MATCH (u{uuid:$uuid})
+		User(email: String): User @cypher(statement: """
+			MATCH (u{email:$email})
 			RETURN u
 		""")
 	}

@@ -2,6 +2,7 @@ import { __x, __o } from './defaults';
 import {
 	atom,
 	selector,
+	selectorFamily,
 	useRecoilState,
 	useRecoilValue,
 	useSetRecoilState,
@@ -13,19 +14,81 @@ import localStorage from "store2";
 import { useInterval, recolor } from '../tools/functions';
 import emoji from '../tools/emojis';
 
-import { useQuery, gql } from "@apollo/client";
+//import { getServerSession } from "next-auth/next"
 
-//import './../App.scss';
-//import Link from "./LinkComponent";
+import { ApolloClient, HttpLink, InMemoryCache, gql, } from "@apollo/client";
+
+const client = new ApolloClient({
+	link: new HttpLink({ uri: '/api/graphql' }),
+	cache: new InMemoryCache(),
+});
+
+const NOTE_QUERY = gql`
+	query($uuid: String){
+		Note(uuid: $uuid){
+			uuid
+			color
+			icon
+			text
+			links(uuid: $uuid){
+				uuid
+				positionX
+				positionY
+				lengthX
+				lengthY
+				canTravel
+			}
+		}
+	}
+`
+
+export const NEO_proto_atom = selectorFamily({
+	key: "NEO_proto_atom",
+	get: uuid => async ()=>{
+		const response = await client.query({
+			query: NOTE_QUERY,
+			variables:{ uuid }
+		});
+		if(response.error){ throw response.error; }
+		return response;
+	}
+});
 
 /////////////////////////////////////////////////////////////////////
 
-
-const NEO_email_atom = atom({
-	key:"NEO_email_atom",
-	default:"chrispurban@gmail.com",
+export const NEO_session_atom = atom({
+	key:"NEO_session_atom",
+	default:null,
+	effects:[
+		({onSet})=>{ onSet( (changedValues)=>{
+			console.log("received new session", changedValues)
+		} ); }
+	],
 })
-	
+
+const USER_QUERY = gql`
+	query($email: String){
+		User(email: $email) {
+			uuid
+			current
+			email
+		}
+	}
+`
+
+export const NEO_user_atom = selector({
+	key: "NEO_user_atom",
+	get: async ({get})=>{
+		const response = await client.query({
+			query: USER_QUERY,
+			variables:{ email: get(NEO_session_atom)?.user?.email }
+		});
+		if(response.error){ throw response.error; }
+		return response;
+	}
+});
+
+
 /*
 export const NEO_user_atom = graphQLSelector({
 	key:"NEO_user_atom",
@@ -45,21 +108,6 @@ export const NEO_user_atom = graphQLSelector({
 */
 
 
-
-export const NEO_proto_atom = atom({
-	key:"NEO_proto_atom",
-	default:null,
-	effects:[
-		({onSet})=>{ onSet( (changedValues)=>{
-			/*
-			localStorage("canvas", changedValues);
-			//console.clear()
-			console.warn(`NAVIGATING to canvas for node ${changedValues}`)
-			*/
-		} ); }
-	],
-});
-
 /////////////////////////////////////////////////////////////////////
 
 
@@ -76,6 +124,7 @@ export const NEO_canvasID_atom = atom({
 		} ); }
 	],
 });
+
 
 /////////////////////////////////////////////////////////////////////
 

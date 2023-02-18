@@ -1,6 +1,7 @@
 import { __x, __o, defaultNodes, defaultLinks } from '../tools/defaults';
 import { resetApp } from '../tools/functions';
- import {
+import { useSession, } from "next-auth/react";
+import {
 	canvasID_atom,
 	node_atom,
 	link_atom,
@@ -8,6 +9,9 @@ import { resetApp } from '../tools/functions';
 	selectedNodeID_atom,
 	pocketID_atom,
 } from "../tools/atoms";
+import {
+	NEO_session_atom,
+} from "../tools/NEO_atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import {
 	memo,
@@ -50,9 +54,21 @@ console.error(`Secret tip: to reset local storage, hold ALT and double-click the
 
 export default function Spine(props:any){
 
+	const {data: sessionData} = useSession(); // returned object's .data property is assigned and renamed to sessionData
+	const NEO_sessionΔ = useSetRecoilState(NEO_session_atom)
+	useEffect(()=>{NEO_sessionΔ(sessionData)},[sessionData]);
+
+
 	const canvasID = useRecoilValue(canvasID_atom)
 	const selectedNodeIDΔ = useSetRecoilState(selectedNodeID_atom)
 	useEffect(()=>{selectedNodeIDΔ(null)},[canvasID]);
+
+	useEffect(()=>{
+		const handleKey = (e:any)=>{				if(e.key == "Home"){console.error( "user session",	sessionData
+		)}};				window.addEventListener('keyup', handleKey);
+		return ()=>{window.removeEventListener('keyup', handleKey);};
+	},[																														sessionData
+	])
 
 	return(<>
 		<div
