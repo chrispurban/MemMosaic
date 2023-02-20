@@ -8,11 +8,15 @@ import {
 	scale_atom,
 	selectedNodeID_atom,
 	pocketID_atom,
+	NEO_session_atom,
 } from "../tools/atoms";
 import {
-	NEO_session_atom,
-} from "../tools/NEO_atoms";
-import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
+	atom,
+	selector,
+	useRecoilState,
+	useRecoilValue,
+	useSetRecoilState,
+} from "recoil";
 import {
 	memo,
 	useState,
@@ -58,41 +62,38 @@ export default function Spine(props:any){
 	const NEO_sessionΔ = useSetRecoilState(NEO_session_atom)
 	useEffect(()=>{NEO_sessionΔ(sessionData)},[sessionData]);
 
-
 	const canvasID = useRecoilValue(canvasID_atom)
 	const selectedNodeIDΔ = useSetRecoilState(selectedNodeID_atom)
-	useEffect(()=>{selectedNodeIDΔ(null)},[canvasID]);
+	useEffect(()=>{selectedNodeIDΔ(null)},[canvasID]); // deselect because you've effectively refreshed the page
 
-	useEffect(()=>{
-		const handleKey = (e:any)=>{				if(e.key == "Home"){console.error( "user session",	sessionData
-		)}};				window.addEventListener('keyup', handleKey);
-		return ()=>{window.removeEventListener('keyup', handleKey);};
-	},[																														sessionData
+
+	useEffect(()=>{const hk=(e:any)=>{if(e.key=="Home"){console.error(
+			"user session",
+			sessionData
+		)}};window.addEventListener('keyup',hk);return()=>{window.removeEventListener('keyup',hk);};},[
+			sessionData
 	])
 
 	return(<>
-		<div
-			style={{
-				position:'relative',
-				width:'100vw', maxWidth:'100svw',
-				height:'50vh', maxHeight:'50svh',
-			}}
-			>
-			{
-				<NEO_Canvas/>
-			}
+	{/*//////////////////////////////////////////////////////////////*/}
+		<div style={{
+			position:'relative',
+			width:'100vw', maxWidth:'100svw',
+			height:'50vh', maxHeight:'50svh',
+		}}>
+			<NEO_Canvas/>
 		</div>
-		<div
-			style={{
-				position:'relative',
-				width:'100vw', maxWidth:'100svw',
-				height:'100vh', maxHeight:'100svh',
-			}}
-			>
+	{/*//////////////////////////////////////////////////////////////*/}
+		<div style={{
+			position:'relative',
+			width:'100vw', maxWidth:'100svw',
+			height:'100vh', maxHeight:'100svh',
+		}}>
 			<Sidebar/>
 			<Frame/>
 			<Canvas/>
 			<Report/>
 		</div>
+	{/*//////////////////////////////////////////////////////////////*/}
 	</>)
 }

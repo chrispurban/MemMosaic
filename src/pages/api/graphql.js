@@ -17,14 +17,14 @@ const typeDefs = gql`
 			RETURN u
 		""")
 	}
-	type Note @exclude(operations:[CREATE, DELETE]) {
+	type Note @exclude(operations:[DELETE]) {
 		uuid: String
 		color: String
 		icon: String
 		text: String
 		links(uuid: String): [LinkRelationship!]! @cypher(statement: """
-			MATCH (n{uuid: $uuid})-[r:Link]-(m)
-			RETURN r
+			MATCH (n{uuid: $uuid})-[l:Link]-(m)
+			RETURN l
 		""")
 	}
 	type LinkRelationship implements Link {
@@ -48,8 +48,31 @@ const typeDefs = gql`
 		email: String
 		current: String
 	}
-`
 
+	type Mutation {
+		createUser(email: String!): User @cypher(statement: """
+			CREATE (
+				n:Note{
+					uuid:apoc.create.uuid(),
+					color: 'hsl(0,0%,90%)',
+					icon: '🧿',
+					text: 'Origin',
+					origin:true
+				}
+			)<-[:Begins_At]-(
+				u:User{
+					email:$email,
+					uuid:apoc.create.uuid()
+				}
+			)-[:Owns]->(n)
+			RETURN u
+		""")
+	}
+
+`
+//RETURN u{.*, favorite:n}, n{.*, uuid: n.uuid, color: n.color, icon: n.icon, text: n.text, links: n.links
+//RETURN u{.*, origin:n}
+//RETURN u, n AS origin
 /*
 		notes: (Note) @cypher(statement: """
 			MATCH (n)-[this]-(m)

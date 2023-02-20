@@ -2,11 +2,9 @@ import { useInterval, recolor } from '../tools/functions';
 import { __x, __o } from '../tools/defaults';
 import emoji from '../tools/emojis';
 import {
-	NEO_canvasID_atom,
-	NEO_note_atom,
 	NEO_proto_atom,
 	NEO_user_atom,
-} from "../tools/NEO_atoms";
+} from "../tools/atoms";
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState, useRecoilValueLoadable, } from "recoil";
 import {
 	memo,
@@ -68,7 +66,8 @@ export default function NEO_Canvas(){
 		const handleKey = (e:any)=>{
 			if(e.key == "Home"){
 				console.log("graphql retrieved data", NEO_proto)
-				console.log("user session", NEO_user)
+				console.warn("user session", NEO_user?.contents?.data?.User)
+				//console.warn("user session", NEO_user)
 			}
 		}
 			window.addEventListener('keyup', handleKey);
