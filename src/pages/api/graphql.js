@@ -1,4 +1,4 @@
-import { gql, ApolloServer } from "apollo-server-micro";
+import { gql, ApolloServer, InMemoryCache } from "apollo-server-micro";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
@@ -6,15 +6,50 @@ import { Neo4jGraphQL } from "@neo4j/graphql";
 let startServer;
 let apolloServer;
 
-const typeDefs = gql`
-	type Query {
-		Note(uuid: String): Note @cypher(statement: """
-			MATCH (n{uuid:$uuid})
-			RETURN n
-		""")
+// need to make sure we're getting things which are owned by the user
+
+/*
 		User(email: String): User @cypher(statement: """
 			MATCH (u{email:$email})
 			RETURN u
+		""")
+*/
+
+/*
+		destination: Note @cypher(statement: """
+			MATCH (source)-[this]-(d)
+			RETURN d
+		""")
+
+		destination: Note @cypher(statement: """
+			MATCH (source)-[this]->(d:Note)
+			RETURN d
+			UNION
+			MATCH (d:Note)-[this]->(source)
+			RETURN d
+		""")
+*/
+
+// links did not behave when the query did not care about direction
+// possibly two problems with this at both the level of links query and destination query
+// queryside union produced nothing
+
+const typeDefs = gql`
+
+	type Query {
+		Note(noteID: String, userID: String): Note @cypher(statement: """
+      	MATCH (u:User{uuid:$userID})-[:Owns]->(n:Note{uuid:$noteID})
+      	RETURN n
+    	""")
+		User(email: String): User @cypher(statement: """
+			OPTIONAL MATCH (u:User {email: $email})
+			WITH u
+			WHERE u IS NOT NULL
+			RETURN u AS User
+			UNION
+			MATCH (d:Default:User)
+			WHERE $email IS NULL
+			RETURN d AS User
 		""")
 	}
 	type Note @exclude(operations:[DELETE]) {
@@ -22,28 +57,50 @@ const typeDefs = gql`
 		color: String
 		icon: String
 		text: String
-		links(uuid: String): [LinkRelationship!]! @cypher(statement: """
-			MATCH (n{uuid: $uuid})-[l:Link]-(m)
+		linksOut: [LinkOutbound!]! @cypher(statement: """
+			MATCH (this)-[l:Link]->()
+			RETURN l
+		""")
+		linksIn: [LinkInbound!]! @cypher(statement: """
+			MATCH (this)<-[l:Link]-()
 			RETURN l
 		""")
 	}
-	type LinkRelationship implements Link {
+
+	type LinkOutbound implements Link {
 		uuid: String
 		positionX: Float
 		positionY: Float
 		lengthX: Float
 		lengthY: Float
 		canTravel: Boolean
-	 }
-	 interface Link{
-		uuid: String
-		positionX: Float
-		positionY: Float
-		lengthX: Float
-		lengthY: Float
-		canTravel: Boolean
+		destination: Note @cypher(statement: """
+			MATCH (source)-[this]->(d)
+			RETURN d
+		""")
 	}
-	type User{
+	type LinkInbound implements Link {
+		uuid: String
+		positionX: Float
+		positionY: Float
+		lengthX: Float
+		lengthY: Float
+		canTravel: Boolean
+		destination: Note @cypher(statement: """
+			MATCH (source)<-[this]-(d)
+			RETURN d
+		""")
+	}
+	interface Link {
+		uuid: String
+		positionX: Float
+		positionY: Float
+		lengthX: Float
+		lengthY: Float
+		canTravel: Boolean
+		destination: Note
+	}
+	type User {
 		uuid: String
 		email: String
 		current: String
@@ -65,6 +122,7 @@ const typeDefs = gql`
 					uuid:apoc.create.uuid()
 				}
 			)-[:Owns]->(n)
+			SET u.current = n.uuid
 			RETURN u
 		""")
 	}
@@ -99,7 +157,8 @@ export default async function handler(req, res){
 			introspection:true,
 			plugins:[
 				ApolloServerPluginLandingPageGraphQLPlayground
-			]
+			],
+			//cache: new InMemoryCache()
 		})
 		startServer = apolloServer.start();
 	}
