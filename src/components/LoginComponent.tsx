@@ -1,14 +1,6 @@
 import { useSession, signIn, signOut, } from "next-auth/react";
 import { __x, __o, } from '../tools/defaults';
 import { useEffect, useState, useRef } from "react";
-import { useInterval, recolor, } from '../tools/functions';
-import { useRecoilState } from 'recoil';
-import {
-	canvasID_atom,
-	node_atom,
-} from "../tools/atoms";
-
-import styles from "../pages/index.module.css";
 
 import { Magic } from "magic-sdk";
 // magic-sdk is only availabile in the browser
@@ -16,45 +8,33 @@ const magic = typeof window !== 'undefined' && new Magic(process.env.NEXT_PUBLIC
 
 export default function Login(){
 	const {data: sessionData} = useSession(); // returned object's .data property is assigned and renamed to sessionData
-	//console.log(`look at my cool OC`,sessionData)
 
-	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
-	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
 	const [ formEmail, formEmailΔ ] = useState("");
 
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const textRef = useRef<HTMLTextAreaElement>(null);
 
-
-
-	useEffect(()=>{ if(!sessionData){const ref = textRef.current; if(ref != null){ref.focus()}} },[])
-	
+	useEffect(()=>{ if(!sessionData){const ref = textRef.current; if(ref != null){ref.focus()}} },[])	
 
 	async function handleSignIn(){
 		if(!sessionData){
 			console.log(`attempting to log in with ${formEmail}`)
 			if(magic){
-				try {
-					const didToken = await magic.auth.loginWithMagicLink({ email:formEmail });
-						// log in with Magic
-					await signIn('credentials',{
-						// log in with NextAuth
+				try{
+					const didToken = await magic.auth.loginWithMagicLink({ email:formEmail }); // log in with Magic
+					await signIn('credentials',{ // log in with NextAuth
 						didToken,
 						redirect: false
 					})	
-					console.error(`login with ${formEmail} successful`)
+					if(typeof window !== "undefined"){
+						window.location.reload() // force reload to clear away default data
+					}
+
 				}
-				catch (x){
-					console.error(`login with ${formEmail} failed`)
-					// is there a way to hit ESC on failure?
-				}
+				catch(x){console.error(`login with ${formEmail} failed`)} // is there a way to hit ESC on failure?
 			}
 		}
-		else{
-			signOut()
-			// prevent refresh
-		}
-
+		else{signOut()}
 	}
 	
 	return(
@@ -69,7 +49,7 @@ export default function Login(){
 				&& sessionData
 				&& <div
 					style={{
-						backgroundColor:`${recolor(node.color, {hue:0,sat:0,lum:5})}`,
+						backgroundColor:`white`,
 						height:`60px`,
 						padding:`10px`,
 						textAlign:`center`,
@@ -82,7 +62,7 @@ export default function Login(){
 			<form
 				onSubmit={(e)=>{
 					handleSignIn()
-					e.preventDefault()
+					e.preventDefault() // stop refresh so that the popup can appear
 				}}
 			>
 				{

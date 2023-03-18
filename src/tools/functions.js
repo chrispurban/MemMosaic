@@ -32,11 +32,11 @@ https://overreacted.io/making-setinterval-declarative-with-react-hooks/
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-export function recolor( hslString, {hue,sat,lum}={} ){
-	// passing in quotes sets a value that is explicit instead of relative
-	let newHue = typeof hue == 'string' ? hue*1 : hslString.split(",")[0].replace(/\D/g,'')*1+(hue?hue:0);
-	let newSat = typeof sat == 'string' ? sat*1 : hslString.split(",")[1].replace(/\D/g,'')*1+(sat?sat:0);
-	let newLum = typeof lum == 'string' ? lum*1 : hslString.split(",")[2].replace(/\D/g,'')*1+(lum?lum:0);
+export function recolor( hslString, {hue=0,sat=0,lum=0}={hue:number|string,sat:number|string,lum:number|string} ){
+	// adjustment is relative when passing a number, and explicit when passing a string
+	let newHue = typeof hue=='number'? hslString.split(",")[0].replace(/\D/g,'')*1+(hue?hue:0): hue*1;
+	let newSat = typeof sat=='number'? hslString.split(",")[1].replace(/\D/g,'')*1+(sat?sat:0): sat*1;
+	let newLum = typeof lum=='number'? hslString.split(",")[2].replace(/\D/g,'')*1+(lum?lum:0): lum*1;
 	return [
 		`hsl(`,
 			`${(newHue +360) %360},`, // wrap color wheel
@@ -68,6 +68,6 @@ export function resetApp(){
 
 /*
 export function cleanupNodes(){
-    // find all nodes which have no links  and delete them from localstorage
+    // find all nodes which have no links and delete them from localstorage
 }
 */

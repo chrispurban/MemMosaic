@@ -1,31 +1,30 @@
 import { __x, __o } from '../tools/defaults';
 import { useInterval, recolor, } from '../tools/functions';
 import Login from "./LoginComponent";
-import { useSession, signIn, signOut, } from "next-auth/react";
 import { useState } from 'react';
 import { trpc, } from "../utils/trpc";
 import { useEffect } from 'react';
 import { useRef } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
-	canvasID_atom,
-	pocketID_atom,
-	node_atom,
-} from "../tools/atoms";
+	NEO_canvasID_atom,
+	NEO_user_selector,
+	NEO_note_atom,
+} from "./RecoilComponent";
 import { useDeviceSelectors } from 'react-device-detect';
 
 /*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 export default function Sidebar(){
 
-	const [ canvasID, canvasIDΔ ] = useRecoilState(canvasID_atom)
-	const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)
-	const [ node, nodeΔ ] = useRecoilState(node_atom(canvasID))
+	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
+	//const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)
+	const [ note, noteΔ ] = useRecoilState(NEO_note_atom(canvasID))
 
-	const [selectors, data] = useDeviceSelectors(window.navigator.userAgent)
+	const [ selectors, data ] = useDeviceSelectors(window.navigator.userAgent)
 	const { isWindows } = selectors
 
-	const user = useSession().data?.user?.email
+	const currentID = useRecoilValue(NEO_user_selector).current
 
 	/*
 	const {data: sessionData} = useSession()
@@ -45,15 +44,15 @@ export default function Sidebar(){
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-	// convert top bar to toggle for a menu for editing the canvas properties
 	// right sidebar contains travel history, origin at top
-	// origin will later be removed in favor of expanded view of the entire network that's not tied to anything
+	// origin will later be removed in favor of expanded view of the entire map
 
 	function Sidebar({left, content}:any){
 		const [ expanded, expandedΔ ] = useState(false)
 		const componentRef = useRef<HTMLDivElement>(null)
 
-		/// HANDLE CLICKING OUTSIDE COMPONENT ///
+		/////////////////////////////////////////////////////////////////////////////////////
+		// HANDLE CLICKING OUTSIDE COMPONENT vvv
 		useEffect(()=>{
 			const handleKey = (e:any)=>{
 				if(e.key == "Escape"){expandedΔ(false)}
@@ -69,9 +68,15 @@ export default function Sidebar(){
 		},[
 			expanded,
 		]);
+		// HANDLE CLICKING OUTSIDE COMPONENT ^^^
+		/////////////////////////////////////////////////////////////////////////////////////
+		
 		
 		return(<>
-			<div
+			{
+				__x
+				&& note.color
+				&& <div
 				ref={componentRef}
 				style={{
 					position:'absolute',
@@ -84,8 +89,8 @@ export default function Sidebar(){
 					display:`flex`,
 					flexDirection:`column`,
 					gap:`12px`,
-					backgroundColor:recolor(node.color, {hue:0, lum:(-30), sat:0}),
-					outline:`2px solid ${recolor(node.color, {hue:0, lum:(-40), sat:0})}`,
+					backgroundColor:recolor(note.color, {hue:0, lum:(-30), sat:0}),
+					outline:`2px solid ${recolor(note.color, {hue:0, lum:(-40), sat:0})}`,
 				}}
 			>
 				<button
@@ -97,12 +102,14 @@ export default function Sidebar(){
 						alignItems:`center`, justifyContent:`center`,
 						textAlign:`center`,
 						border:`0px`,
-						backgroundColor:recolor(node.color, {hue:0, lum:(-20), sat:0}),
-						outline:`1px solid ${recolor(node.color, {lum:(expanded?-50:-40),hue:0,sat:0})}`,
+						backgroundColor:recolor(note.color, {hue:0, lum:(-20), sat:0}),
+						outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40),hue:0,sat:0})}`,
 						userSelect:`none`,
 					}}
 					onClick={(e)=>{
 						if(left){ // temporary behavior; once history is added, this will become the first option within it
+							canvasIDΔ(currentID)
+							/*
 							if(canvasID == "N 0"){ // you're on the origin
 								//pocketIDΔ(null)
 							}
@@ -110,6 +117,7 @@ export default function Sidebar(){
 								if(!pocketID || pocketID == "N 0"){pocketIDΔ(canvasID)} // nothing in pocket, save current location as the return point
 								canvasIDΔ("N 0") // go to origin
 							}
+							*/
 						}
 						else{
 							expandedΔ((v:boolean)=>!v)
@@ -140,6 +148,7 @@ export default function Sidebar(){
 					</div>
 				}
 			</div>
+			}
 		</>)
 	}
 
@@ -163,23 +172,18 @@ export default function Sidebar(){
 			<>
 				<Login/>
 				<div>
-					User accounts are authenticated purely by email confirmation link but do not currently have other functionality attached.
+					User accounts are authenticated purely by email confirmation link. Changes will only persist with an account.
 				</div>
 				{
-					__x
-					&& user == `chrispurban@gmail.com`
+					__o
 					&& <pre style={{
 					overflowY:`auto`,
 					overflowX:`hidden`,
 					}}>
 						{JSON.stringify(selectors, null, '\r')}
-
 					</pre>
 				}
-				
 			</>
 		}/>
-
 	</>)
-
 }
