@@ -1,6 +1,5 @@
 import { __x, __o } from '../tools/defaults';
 import {
-	scale_atom,
 	NEO_canvasID_atom,
 	NEO_note_atom,
 	NEO_hydra_selector,
@@ -17,6 +16,7 @@ import Note from "./NoteComponent";
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function NEO_Canvas(){
+	console.log("canvas component rendered")
 
 	const [ NEO_hydra , NEO_hydraΔ ] = useRecoilState(NEO_hydra_selector)
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)

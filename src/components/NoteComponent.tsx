@@ -20,6 +20,7 @@ import { gql, } from "@apollo/client";
 import Draggable from 'react-draggable';
 
 export default function Note({passedLink}:any){
+	console.log("note component rendered")
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MAIN DATA vvv

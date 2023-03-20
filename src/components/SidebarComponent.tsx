@@ -16,6 +16,7 @@ import { useDeviceSelectors } from 'react-device-detect';
 /*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 export default function Sidebar(){
+	console.log("sidebar component rendered")
 
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
 	//const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom)

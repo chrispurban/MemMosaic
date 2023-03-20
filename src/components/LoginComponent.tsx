@@ -7,6 +7,7 @@ import { Magic } from "magic-sdk";
 const magic = typeof window !== 'undefined' && new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY || 'a');
 
 export default function Login(){
+	console.log("login component rendered")
 	const {data: sessionData} = useSession(); // returned object's .data property is assigned and renamed to sessionData
 
 	const [ formEmail, formEmailΔ ] = useState("");

@@ -30,6 +30,7 @@ else{
 */
 
 export default function Spine(props:any){
+	console.log("spine component rendered")
 
 	/*
 	const sessionData = useSession(); // returned object's .data property is assigned and renamed to sessionData

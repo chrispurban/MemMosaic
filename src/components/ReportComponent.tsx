@@ -1,9 +1,6 @@
 import { __x, __o } from '../tools/defaults';
 import {
 	scale_atom,
-	atlas_selector,
-	selectedNodeID_atom,
-	pocketID_atom,
 	view_atom,
 } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
@@ -16,12 +13,10 @@ import {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Report(){
+	console.log("report component rendered")
 
 	const [ view, viewΔ ] = useRecoilState(view_atom);
-	const [ pocketID, pocketIDΔ ] = useRecoilState(pocketID_atom);
 	const [ scale, scaleΔ ] = useRecoilState(scale_atom);
-	const selectedNodeID = useRecoilValue(selectedNodeID_atom);
-	const atlas = useRecoilValue(atlas_selector);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
