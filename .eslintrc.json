@@ -11,6 +11,6 @@
     "@typescript-eslint/consistent-type-imports": "warn"
   },
   "ignorePatterns":[
-    "src/pages/api/graphql.js",
+    "src/pages/api/graphql.js"
   ]
 }
