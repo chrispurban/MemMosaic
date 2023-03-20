@@ -20,7 +20,7 @@ import { gql, } from "@apollo/client";
 import Draggable from 'react-draggable';
 
 export default function Note({passedLink}:any){
-	console.log("note component rendered")
+	//console.log("note component rendered")
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MAIN DATA vvv
@@ -29,15 +29,15 @@ export default function Note({passedLink}:any){
 	const [ pocketID, pocketIDΔ ] = useRecoilState<any>(NEO_pocketID_atom);
 
 
-	console.log("note component recieved a link from the canvas", passedLink)
+	//console.log("note component recieved a link from the canvas", passedLink)
 	const linkID = passedLink?.uuid; 			
 	const recoilLink = useRecoilState(NEO_link_atom(linkID))
 	const [ link , linkΔ ] = linkID? recoilLink: [passedLink, ()=>{console.log("no link ID")}]
-	console.log("link identified", link)
+	//console.log("link identified", link)
 	const [ note, noteΔ ] = useRecoilState(NEO_note_atom(
 		link.notes.find((n:any)=>n!==canvasID) || canvasID
 	))
-	console.log("note identified", note)
+	//console.log("note identified", note)
 		
 	// MAIN DATA ^^^
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -263,6 +263,8 @@ export default function Note({passedLink}:any){
 		dragActive, // refocus if dragged while editing; should change to specifically when drag stops
 	]);
 
+	const [ isHidden, isHiddenΔ ] = useState(false)
+
 	// FLAGS FOR EDITING TEXT AND REPOSITIONING ^^^
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -287,6 +289,7 @@ export default function Note({passedLink}:any){
 					){
 						if(link.inPocket || link.inHeader){pocketIDΔ("")}
 						else{
+							isHiddenΔ(true)
 							linkΔΔ(link.uuid, null) // delete the link, which will delete the note as well if it's isolated
 						}
 					}
@@ -321,6 +324,7 @@ export default function Note({passedLink}:any){
 			 	else{
 					switch(e.key){
 					case "Delete":
+						isHiddenΔ(true)
 						//needs more investigation; error "can't find relationship" if deleting too many too quickly
 						linkΔΔ(link.uuid, null)
 					case "Escape":
@@ -371,7 +375,8 @@ export default function Note({passedLink}:any){
 								|| (link.canTravel && 0==note.text.length) // started as a blank canvas
 								|| !link.canTravel // isn't a canvas at all
 							){
-							linkΔΔ(link.uuid, null)
+								isHiddenΔ(true)
+								linkΔΔ(link.uuid, null)
 							} // blank counts as final, get rid of it
 							else{textInputValueΔ(note.text)} // revert back, do nothing
 						}
@@ -536,6 +541,8 @@ export default function Note({passedLink}:any){
 		{
 			__x
 			&& note//.color // can remove check entirely?
+			&& (!(link.inPocket || link.inHeader) || view) // if it's an offset position, don't render it until we get the view dimensions
+			&& !isHidden // don't render it if you're in the middle of deleting it
 			&& <div ref={refComponent}
 				style={{												display:`flex`,
 					
