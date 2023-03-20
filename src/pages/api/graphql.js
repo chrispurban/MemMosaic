@@ -259,10 +259,10 @@ let startServer;
 export default async function handler(req, res){
 	console.log("Apollo handler has begun")
 	if(!apolloServer){ // cold start
-		console.log("Apollo cold start")
+		//console.log("Apollo cold start")
 		const neoSchema = new Neo4jGraphQL({typeDefs, driver});
 		const schema = await neoSchema.getSchema();
-		console.log("Apollo acquired schema")
+		//console.log("Apollo acquired schema")
 		apolloServer = new ApolloServer({
 			schema,
 			playground:true,
@@ -276,13 +276,13 @@ export default async function handler(req, res){
 		startServer = apolloServer.start();
 	}
 //	else{
-	console.log("Apollo warm start")
+	//console.log("Apollo warm start")
 	await startServer;
-	console.log("Apollo started")
+	//console.log("Apollo started")
 	await apolloServer.createHandler({
 		path:'/api/graphql'
 	})(req, res)
-	console.log("Apollo set up API path")
+	//console.log("Apollo set up API path")
 //	}
 
 }

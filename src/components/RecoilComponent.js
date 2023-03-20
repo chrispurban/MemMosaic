@@ -493,7 +493,7 @@ export const scale_atom = atom({
 /////////////////////////////////////////////////////////////////////
 
 export default function RecoilComponent(){
-	console.log("recoil component rendered")
+	//console.log("recoil component rendered")
 
 
 

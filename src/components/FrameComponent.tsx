@@ -16,7 +16,7 @@ import Note from "./NoteComponent";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Frame(){
-	console.log("frame component rendered")
+	//console.log("frame component rendered")
 
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom); // change which canvas is active
 	const [ canvasNote, canvasNoteΔ ] = useRecoilState(NEO_note_atom(canvasID));
