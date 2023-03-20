@@ -13,5 +13,10 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  webpack:(config)=>{
+    config.optimization.minimizer = []
+    config.optimization.minimize = false
+    return config
+  }
 };
 export default config;
