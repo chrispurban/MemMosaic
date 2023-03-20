@@ -13,43 +13,54 @@ import {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Report(){
-	console.log("report component rendered")
+	//console.log("report component rendered")
 
 	const [ view, viewΔ ] = useRecoilState(view_atom);
 	const [ scale, scaleΔ ] = useRecoilState(scale_atom);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
+	const oldDimensions = {
+		height: 0.00,
+	}
+
 	function getView(){
-		const pxGrid = 10
-		const pxAbsolute = (
-			window.visualViewport?.height || window.innerHeight // window.innerHeight did not include decimals, visualViewport not immediately available
-		)
-		//console.log("pxAbsolute", pxAbsolute)
 
-		const offset = ((
-			pxAbsolute
-		)	/ 2 // half screen, from center
-		)	/ pxGrid // pixel unit
-		
-		const pxUnits = Math.floor(
-			offset
-		)
-		//console.log("pxUnits", pxUnits)
+		if(oldDimensions.height != window.innerHeight){
+			oldDimensions.height = window.innerHeight
 
-		const pxExtra = ((
-			offset
-		)	% 1 // give back what floor cut off
-		)	* pxGrid // push back up to explicit pixels
-		//console.log("pxExtra", pxExtra)
+			const pxGrid = 10
+			const pxAbsolute = (
+				window.visualViewport?.height || window.innerHeight // window.innerHeight did not include decimals, visualViewport not immediately available
+			)
+			//console.log("pxAbsolute", pxAbsolute)
+	
+			const offset = ((
+				pxAbsolute
+			)	/ 2 // half screen, from center
+			)	/ pxGrid // pixel unit
+			
+			const pxUnits = Math.floor(
+				offset
+			)
+			//console.log("pxUnits", pxUnits)
+	
+			const pxExtra = ((
+				offset
+			)	% 1 // give back what floor cut off
+			)	* pxGrid // push back up to explicit pixels
+			//console.log("pxExtra", pxExtra)
+	
+			const foundView = {
+				...view,
+				pxAbsolute,
+				pxUnits,
+				pxExtra,
+			}
+			viewΔ(foundView)
 
-		const foundView = {
-			...view,
-			pxAbsolute,
-			pxUnits,
-			pxExtra,
 		}
-		viewΔ(foundView)
+
 	}
 	useEffect(()=>{getView()},[]);
 	useEffect(()=>{
