@@ -267,7 +267,7 @@ export default async function handler(req, res){
 			plugins:[
 				ApolloServerPluginLandingPageGraphQLPlayground
 			],
-			cache:'bounded'
+			cache:'bounded',
 			//cache: new InMemoryCache()
 		})
 		startServer = apolloServer.start();
