@@ -26,12 +26,13 @@ export default function Report(){
 
 	function getView(){
 
-		if(oldDimensions.height != window.innerHeight){
+//		if(oldDimensions.height != window.innerHeight){
 			oldDimensions.height = window.innerHeight
 
 			const pxGrid = 10
 			const pxAbsolute = (
-				window.visualViewport?.height || window.innerHeight // window.innerHeight did not include decimals, visualViewport not immediately available
+				//window.visualViewport?.height || 
+				window.innerHeight // window.innerHeight did not include decimals, visualViewport not immediately available
 			)
 			//console.log("pxAbsolute", pxAbsolute)
 	
@@ -59,7 +60,7 @@ export default function Report(){
 			}
 			viewΔ(foundView)
 
-		}
+//		}
 
 	}
 	useEffect(()=>{getView()},[]);
