@@ -3,9 +3,6 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-co
 import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 
-let startServer;
-let apolloServer;
-
 // need to make sure we're getting things which are owned by the user
 
 /*
@@ -256,6 +253,9 @@ const driver = neo4j.driver(
 	)
 )
 
+let apolloServer;
+let startServer;
+
 export default async function handler(req, res){
 	console.log("Apollo handler has begun")
 	if(!apolloServer){ // cold start
@@ -275,15 +275,15 @@ export default async function handler(req, res){
 		})
 		startServer = apolloServer.start();
 	}
-	else{
-		console.log("Apollo warm start")
-		await startServer;
-		console.log("Apollo started")
-		await apolloServer.createHandler({
-			path:'/api/graphql'
-		})(req, res)
-		console.log("Apollo set up API path")
-	}
+//	else{
+	console.log("Apollo warm start")
+	await startServer;
+	console.log("Apollo started")
+	await apolloServer.createHandler({
+		path:'/api/graphql'
+	})(req, res)
+	console.log("Apollo set up API path")
+//	}
 
 }
 
