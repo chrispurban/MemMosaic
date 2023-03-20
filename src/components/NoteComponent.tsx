@@ -27,12 +27,16 @@ export default function Note({passedLink}:any){
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom);
 	const [ pocketID, pocketIDΔ ] = useRecoilState<any>(NEO_pocketID_atom);
 
+
+	console.log("note component recieved a link from the canvas", passedLink)
 	const linkID = passedLink?.uuid; 			
 	const recoilLink = useRecoilState(NEO_link_atom(linkID))
 	const [ link , linkΔ ] = linkID? recoilLink: [passedLink, ()=>{console.log("no link ID")}]
+	console.log("link identified", link)
 	const [ note, noteΔ ] = useRecoilState(NEO_note_atom(
 		link.notes.find((n:any)=>n!==canvasID) || canvasID
 	))
+	console.log("note identified", note)
 		
 	// MAIN DATA ^^^
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////

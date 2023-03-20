@@ -64,6 +64,7 @@ export const NEO_user_selector = selector({
 	get: async ({get})=>{
 		const userSession = await getSession()
 		const email = userSession?.user?.email
+		console.log("user session obtained", userSession)
 		
 		let user
 		const readResponse = await client.query({ // see if they have a user account yet

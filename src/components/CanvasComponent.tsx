@@ -23,7 +23,9 @@ export default function NEO_Canvas(){
 	const [ canvas, canvasΔ ] = useRecoilState(NEO_note_atom(canvasID))
 
 	useEffect(()=> { // pass async GET to SET; other options internal to Recoil not available
+		console.log("canvas initialized", canvas)
 		if(!canvas.queried){NEO_hydraΔ(NEO_hydra)}
+		console.log("canvas ran hydra", NEO_hydra)
 	},[
 		canvas, NEO_hydra
 	]) // now that Recoil has its own component, can likely put there as here its kind of hacky
