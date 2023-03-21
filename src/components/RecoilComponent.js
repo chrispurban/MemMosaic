@@ -1,33 +1,22 @@
 import { __x, __o } from '../tools/defaults';
+import emoji from '../tools/emojis';
+import { recolor } from '../tools/functions';
+
 import {
 	atom,
 	atomFamily,
 	selector,
-	useRecoilState,
 	useRecoilValue,
-	selectorFamily,
-	get,
-	set,
-	waitForAll,
-	waitForAllSettled,
-	recoilValueReadOnly,
+	useRecoilState,
 } from "recoil";
-//import getSession from "next-auth/next";
 
-import emoji from '../tools/emojis';
-import { recolor } from 'tools/functions';
-
+import { useEffect, } from "react";
 import { useSession, getSession, } from "next-auth/react";
 
-import mem from 'mem';
-import localStorage from "store2";
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import { ApolloClient, HttpLink, InMemoryCache, gql, } from "@apollo/client";
-import { any } from 'zod';
 
 export const client = new ApolloClient({
 	link: new HttpLink({ uri: '/api/graphql' }),
@@ -37,6 +26,8 @@ export const client = new ApolloClient({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+// handled directly with getSession right now
 export const NEO_session_atom = atom({
 	key:"NEO_session_atom",
 	default:undefined,
@@ -56,6 +47,7 @@ export const NEO_session_atom = atom({
 		} ); }
 	],
 })
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,14 +120,17 @@ export const NEO_canvasID_atom = atom({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// uses the currently selected canvas note and sets up state for all its related notes
+// this process repeats every time the user navigates, but only the first time for each note
+// there are three redundant checks to prevent an infinite loop: the GET, the Canvas component, and the SET
 export const NEO_hydra_selector = selector({
 	key:'NEO_hydra_selector',
 	get: async ({ get }) => {
 
-		const noteID = get(NEO_canvasID_atom)
-		const noteCanvas = get(NEO_note_atom(noteID))
+		const canvasID = get(NEO_canvasID_atom)
+		const canvas = get(NEO_note_atom(canvasID))
 
-		if(!noteCanvas.queried){
+		if(!canvas.queried){
 			const userID = get(NEO_user_selector).uuid
 			const response = await client.query({
 				query: gql`
@@ -183,7 +178,7 @@ export const NEO_hydra_selector = selector({
 						}
 					}
 				}`,
-				variables:{ noteID, userID }
+				variables:{ noteID:canvasID , userID }
 			});
 			if(response.error){ throw response.error; }
 			return response;
@@ -193,18 +188,19 @@ export const NEO_hydra_selector = selector({
 		}
 	},
 	// SET is not allowed to be asynchronous but can apparently still rely on an asynchronous selector so long as that selector has been initialized at least once; otherwise there's an error about pending state
+	// acquired data is simply what came from GET but routed through the Canvas component, as Recoil requires all SETs to begin in this fashion
 	set:({set, get}, strip)=>{ const acquired = strip.data.Note
 		if(acquired){
-		const 				noteInner =				get(NEO_note_atom(acquired.uuid))
-		if(				  !noteInner.queried){	set(NEO_note_atom(acquired.uuid),{
+		const 				canvas =					get(NEO_note_atom(acquired.uuid))
+		if(				  !canvas.queried){		set(NEO_note_atom(acquired.uuid),{
 				queried:		true,
-				uuid:			noteInner.uuid			||						acquired.uuid,
-				color:		noteInner.color		||						acquired.color,
-				text:			noteInner.text			||						acquired.text,
-				icon:			noteInner.icon			||						acquired.icon,
+				uuid:			canvas.uuid				||						acquired.uuid,
+				color:		canvas.color			||						acquired.color,
+				text:			canvas.text				||						acquired.text,
+				icon:			canvas.icon				||						acquired.icon,
 				links:[	
 					...new Set([ // remove duplicate client links if the network was fast enough
-						...	noteInner.links,
+						...	canvas.links,
 						...[
 							...acquired.linksOut,
 							...acquired.linksIn
@@ -496,11 +492,20 @@ export default function RecoilComponent(){
 	//console.log("recoil component rendered")
 
 
+	const [ NEO_hydra , NEO_hydraΔ ] = useRecoilState(NEO_hydra_selector)
+	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
+	const [ canvas, canvasΔ ] = useRecoilState(NEO_note_atom(canvasID))
 
-
+	useEffect(()=> { // pass async GET to SET; other options internal to Recoil not available
+		if(!canvas.queried){NEO_hydraΔ(NEO_hydra)}
+	},[
+		canvas, NEO_hydra
+	])
 
 
 
 	const anchorUUID = useRecoilValue(NEO_UUID_selector)
+
+
 	return null
 }

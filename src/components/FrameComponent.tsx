@@ -47,11 +47,7 @@ export default function Frame(){
 		return(<>
 			{
 				__x
-				//&& canvasNote.queried // hydra has run, populating an otherwise empty atom
-				//&& canvasNote.uuid
-				/*
-				&& <div>hello top</div>
-				*/
+				&& canvasNote.text // don't expose before first hydra has run
 				&& <Note {...{passedLink:{
 					uuid:null,
 					position:{x:0,y:-1},
