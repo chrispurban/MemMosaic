@@ -1,20 +1,20 @@
 import { __x, __o } from '../tools/defaults';
-import {
-	scale_atom,
-	view_atom,
-} from "./RecoilComponent";
+
+import { view_atom, } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
-import {
-	useEffect,
-} from 'react';
+
+import { useEffect, } from 'react';
+import { useDeviceSelectors } from 'react-device-detect';
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Report(){
 	//console.log("report component rendered")
 
+	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
 	const [ view, viewΔ ] = useRecoilState(view_atom);
-	const [ scale, scaleΔ ] = useRecoilState(scale_atom);
+
+	console.log(view)
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,70 +24,55 @@ export default function Report(){
 		// idea was to still use that but only update when another non-sensitive measure changed, though this hasn't been found yet
 		// if(oldDimensions.height != window.innerHeight){ oldDimensions.height = window.innerHeight
 
-			const pxGrid = 10
-
-			const pxAbsolute = (
+			const absolute = (
 				//window.visualViewport?.height || // visualViewport is not immediately available upon render
 				window.innerHeight
 			)
 	
 			const offset = (
 				((
-					pxAbsolute
+					absolute
 				)	/ 2 // half screen, from center
-				)	/ pxGrid // pixel unit
+				)	/ view.grid // pixel unit
 			)
 			
-			const pxUnits = (
+			const divided = (
 				Math.floor(
 					offset
 				)
 			)
 	
-			const pxExtra = (
+			const remainder = (
 				((
 					offset
 				)	% 1 // give back what floor cut off
-				)	* pxGrid // push back up to explicit pixels
+				)	* view.grid // push back up to explicit pixels
 			)
 
-			const updatedView = {
-				...view,
-				pxAbsolute,
-				pxUnits,
-				pxExtra,
-			}
-			viewΔ(updatedView)
+			viewΔ((v:any)=>{return{
+				...v,
+				height:{
+					...v.height,
+					absolute,
+					divided,
+					remainder,
+				}
+			}})
 
 	}
-	useEffect(()=>{getView()},[]);
+	useEffect(()=>{
+		getView()
+		viewΔ((v:any)=>{return{
+			...v,
+			system:selectors
+		}})
+	},[]);
 	useEffect(()=>{
 		window.addEventListener("resize", getView);
 		return () => window.removeEventListener("resize", getView);
 	});
 
  	 //////////////////////////////////////////////////////////////////////////////////////////////
-
-	/*
-	useEffect(()=>{
-		const handleWheel = (event)=>{
-			//console.log(event)
-			scaleΔ(
-				(s)=>{
-					let scrollRate = 20
-					console.log(Math.round(event.deltaY/scrollRate))
-					return {...s,
-						unit:s.unit-Math.round(event.deltaY/scrollRate)
-					}
-				}
-			)
-		}
-		window.addEventListener('wheel', handleWheel);
-		return ()=>{
-			window.removeEventListener('wheel', handleWheel);
-		}
-	},[scale])
-	*/
 
 	useEffect(()=>{
 		const handleKey = (e:any)=>{
@@ -123,7 +108,7 @@ export default function Report(){
 				zIndex:5000,
 				backgroundColor:`green`,
 				left:'0', top:'0',
-				width:'200px', height:`${view.pxAbsolute-10}px`,
+				width:'200px', height:`${view.absolute-10}px`,
 			}}>
 
 			</div>

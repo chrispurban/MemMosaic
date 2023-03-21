@@ -1,7 +1,6 @@
 import { __x, __o, } from '../tools/defaults';
 import { recolor, } from '../tools/functions';
 import {
-  	scale_atom,
   	view_atom,
   	NEO_pocketID_atom,
   	NEO_canvasID_atom,
@@ -12,7 +11,6 @@ import {
 } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import { useState, useEffect, useRef, } from 'react';
-import { useDeviceSelectors } from 'react-device-detect';
 
 import { useSession, } from "next-auth/react";
 import { gql, } from "@apollo/client";
@@ -45,10 +43,7 @@ export default function Note({passedLink}:any){
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BASIC INTERFACE vvv
 
-	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
-	const { isWindows } = selectors
-	const scale = useRecoilValue(scale_atom);
-	const view = useRecoilValue(view_atom);
+	const view = useRecoilValue<any>(view_atom);
 	const refText:any = useRef<HTMLInputElement>(null);
 	const refComponent = useRef<HTMLDivElement>(null);
 	const refDraggable = useRef<HTMLDivElement>(null);  
@@ -475,7 +470,7 @@ export default function Note({passedLink}:any){
 			dragActiveΔ(false)
 			if(selected && !textEditable){selectedΔ(false)} // deselect if not still editing // make an effect?
 
-			const insideFrame = (view.pxAbsolute/2)-(view.frame+2)-(.5*40*link.length.y) // 60 is the frame section height, 2 is from their outlines
+			const insideFrame = (view.height.absolute/2)-(view.frame+2)-(.5*40*link.length.y) // 60 is the frame section height, 2 is from their outlines
 			if(data.y < -insideFrame){ // higher than top frame
 				//this is running sporadically during drag deletion, seemingly in line with how errattic the drag was but still well within insideFrame
 				//if(link.canTravel){navigateΔ({to:note.uuid, save:true})}
@@ -495,14 +490,14 @@ export default function Note({passedLink}:any){
 				else{ // existing node, reposition
 					linkΔ((l:any)=>{
 						return {...l,position:{
-							x:(data.x/scale.unit),
-							y:(data.y/scale.unit),
+							x:(data.x/view.unit),
+							y:(data.y/view.unit),
 						}}
 					})
 					linkΔΔ(link.uuid,{
 						position:{
-							x:(data.x/scale.unit),
-							y:(data.y/scale.unit)
+							x:(data.x/view.unit),
+							y:(data.y/view.unit)
 						}
 					})
 				}
@@ -560,13 +555,13 @@ export default function Note({passedLink}:any){
 				<Draggable nodeRef={refDraggable}
 					grid={[10, 10]}
 					position={{
-						x:Math.round(link.position.x*scale.position),
-						y:Math.round(link.position.y*scale.position)*(!(link.inPocket || link.inHeader)?
-						1:(view.pxUnits-3)/4),
+						x:Math.round(link.position.x*view.unit),
+						y:Math.round(link.position.y*view.unit)*(!(link.inPocket || link.inHeader)?
+						1:(view.height.divided-3)/4),
 					}}
 					positionOffset={(dragActive || !(link.inPocket || link.inHeader))?undefined:{
 						x:0,
-						y:(view.pxExtra)*link.position.y,
+						y:(view.height.remainder)*link.position.y,
 					}}
 					onStart={onStart} onDrag={onDrag} onStop={onStop}
 					disabled={false}
@@ -594,12 +589,12 @@ export default function Note({passedLink}:any){
 										display:`flex`,
 										alignItems:`center`,
 										justifyContent:`center`,
-										width:`${scale.length*(link.length.y)}px`,
+										width:`${view.unit*(link.length.y)}px`,
 										fontSize:`${link.inHeader?200:150}%`,
 									}}>
 										<span style={{
-											paddingTop:`${isWindows?0:(link.inHeader?3:0)}px`,
-											paddingBottom:`${!isWindows?0:(link.inHeader?3:3)}px`,
+											paddingTop:`${view.system.isWindows?0:(link.inHeader?3:0)}px`,
+											paddingBottom:`${!view.system.isWindows?0:(link.inHeader?3:3)}px`,
 										}}>
 											{note.icon}
 										</span>
@@ -611,16 +606,16 @@ export default function Note({passedLink}:any){
 										display:`flex`,
 										alignItems:`center`,
 										justifyContent:`center`,
-										width:`${scale.length*(link.length.x-(note.icon?link.length.y:0))}px`,
-										height:`${scale.length*(link.length.y)}px`,
+										width:`${view.unit*(link.length.x-(note.icon?link.length.y:0))}px`,
+										height:`${view.unit*(link.length.y)}px`,
 									}}>
 										<span style={{
 											fontSize:`${link.inHeader?140:90}%`,
-											paddingTop:`${isWindows?0:(link.inHeader?3:0)}px`,
-											paddingBottom:`${isWindows?1:0}px`,
+											paddingTop:`${view.system.isWindows?0:(link.inHeader?3:0)}px`,
+											paddingBottom:`${view.system.isWindows?1:0}px`,
 											//paddingRight:`${0}px`,
-											paddingRight:`${( !(note.icon && link.canTravel)? 0: (link.inHeader?1:.5)*scale.unit )/8}px`,
-											margin:`${link.canTravel?0:scale.unit/4}px`
+											paddingRight:`${( !(note.icon && link.canTravel)? 0: (link.inHeader?1:.5)*view.unit )/8}px`,
+											margin:`${link.canTravel?0:view.unit/4}px`
 										}}>
 											{
 												__o
@@ -681,7 +676,7 @@ export default function Note({passedLink}:any){
 								}
 							</div>
 
-							<div style={{fontSize:`80%`, whiteSpace:'pre-wrap', width:`100%`, margin:`5px 0px`, position:`absolute`, bottom:0<link.position.y?`${scale.unit*link.length.y}px`:undefined,}}>
+							<div style={{fontSize:`80%`, whiteSpace:'pre-wrap', width:`100%`, margin:`5px 0px`, position:`absolute`, bottom:0<link.position.y?`${view.unit*link.length.y}px`:undefined,}}>
 								{Object.keys(debugVariables).map((name)=>{return (<div key={name}>
 									{`${name}: ${String((debugVariables as any)[name])}`}{`\n`}
 								</div>)})}

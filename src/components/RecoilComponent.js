@@ -301,7 +301,7 @@ export const NEO_UUID_selector = selector({
 		return UUIDs
 	},
 	set:({set}, oldUUIDs)=>{
-		console.log("you triggered the UUID selector")
+		//console.log("you triggered the UUID selector")
 		set(NEO_UUID_atom,oldUUIDs) // triggers regeneration of UUIDs after 
 	}
 })
@@ -457,32 +457,20 @@ export const NEO_pocketID_atom = atom({
 
 export const view_atom = atom({
 	key:"view_atom",
-	default:{pxAbsolute:0, pxUnits:0, pxExtra:0, frame:60},
-	effects:[
-		({onSet})=>{ onSet( (changedValues)=>{
-		//console.log(`measured`, changedValues)
-		} ); }
-	],
-});
-
-/////////////////////////////////////////////////////////////////////
-
-export const scale_atom = atom({
-	key:"scale_atom",
 	default:{
+		grid:10,
 		unit:40,
-		position:40,
-		length:40,
-	},
-	effects:[
-		/*
-		({onSet})=>{ onSet( (changedValues)=>{
-			console.error(`NAVIGATING to canvas for node `, changedValues);
-		} ); }
-		*/
-	],
-});
+		frame:60,
+		height:{
+			absolute:0,
+			divided:0,
+			remainder:0,
+		},
+		system:{
 
+		}
+	},
+});
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
@@ -490,7 +478,6 @@ export const scale_atom = atom({
 
 export default function RecoilComponent(){
 	//console.log("recoil component rendered")
-
 
 	const [ NEO_hydra , NEO_hydraΔ ] = useRecoilState(NEO_hydra_selector)
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
@@ -502,10 +489,7 @@ export default function RecoilComponent(){
 		canvas, NEO_hydra
 	])
 
-
-
 	const anchorUUID = useRecoilValue(NEO_UUID_selector)
-
 
 	return null
 }
