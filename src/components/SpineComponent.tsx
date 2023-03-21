@@ -12,18 +12,42 @@ export default function Spine(props:any){
 	//console.log("spine component rendered")
 
 	return(<>
-		<div style={{
-			position:'relative',
-			width:'100vw', maxWidth:'100svw',
-			height:'100vh', maxHeight:'100svh',
+			<div style={{
+				position:'relative',
+				width:'100vw', maxWidth:'100svw',
+				height:'100vh', maxHeight:'100svh',
+			}}>
+				<Suspense fallback={<Loading/>}>
+					<Canvas/>
+					<Frame/>
+					<Sidebar/>
+				</Suspense>
+			</div>
+
+			<Suspense fallback={<></>}>
+				<Recoil/>
+				<Report/>
+			</Suspense>
+	</>)
+}
+
+function Loading(){
+	return(<>
+		<div style={{						display:`flex`,
+
+			overflow:`hidden`,			justifyContent:`center`,		
+			pointerEvents:`none`,		alignItems:`center`,				
+			userSelect:`none`,			textAlign:`center`,				
+
+			width:`${100}%`,
+			height:`${100}%`,
+
 		}}>
-			<Canvas/>
-			<Frame/>
-			<Sidebar/>
+			<h1 style={{
+				transform:`translate(${0}%, ${-50}%)`,
+			}}>
+				Loading...
+			</h1>
 		</div>
-		<Suspense fallback={<></>}>
-			<Recoil/>
-			<Report/>
-		</Suspense>
 	</>)
 }
