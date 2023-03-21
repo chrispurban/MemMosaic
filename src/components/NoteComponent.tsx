@@ -276,7 +276,7 @@ export default function Note({passedLink}:any){
 			if(textEditable){
 				if(
 					__o
-					||(e.key == "Delete" && e.ctrlKey) // confirms user means to delete the note itself and not its text
+					||(e.key == "Delete" && e.shiftKey) // confirms user means to delete the note itself and not its text
 					||(e.key == "Escape")
 					||(e.key == "Enter")
 				){
@@ -441,7 +441,7 @@ export default function Note({passedLink}:any){
 			__x
 	//		&& selectionID!==proxyNode.id // not coming from a duplicate
 	//		&& !event.altKey // not trying to reset the app
-	//		&& !(inPocket && !event.ctrlKey) // not a pocket node unless trying to edit
+	//		&& !(inPocket && !event.shiftKey) // not a pocket node unless trying to edit
 		){
 			selectedΔ(true)
 		}
@@ -490,7 +490,7 @@ export default function Note({passedLink}:any){
 				){ // new node to clone
 					linkGeneration(true, true, {x:data.x/40, y:data.y/40})
 					selectedΔ(false)
-					if(!event.ctrlKey){pocketIDΔ("")} // hold CTRL to not empty pocket, if intending to drop the link in many places
+					if(!event.shiftKey){pocketIDΔ("")} // hold CTRL to not empty pocket, if intending to drop the link in many places
 				}
 				else{ // existing node, reposition
 					linkΔ((l:any)=>{
@@ -511,7 +511,7 @@ export default function Note({passedLink}:any){
 		}
 		else if(dragEnabled){ // did not drag // why not a normal else?
 			if(__o
-				|| event.ctrlKey
+				|| event.shiftKey
 				|| !link.canTravel
 				|| link.inHeader
 			){ // trying to edit
