@@ -14,8 +14,6 @@ export default function Report(){
 	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
 	const [ view, viewΔ ] = useRecoilState(view_atom);
 
-	console.log(view)
-
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
 	function getView(){
@@ -64,7 +62,11 @@ export default function Report(){
 		getView()
 		viewΔ((v:any)=>{return{
 			...v,
-			system:selectors
+			system:{
+				isMac:(selectors.isIOS || selectors.isIOS13 || selectors.isMacOs),
+				isWin:(selectors.isWindows || selectors.isWinPhone),
+				isSafari:(selectors.isSafari),
+			}
 		}})
 	},[]);
 	useEffect(()=>{

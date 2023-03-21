@@ -529,8 +529,9 @@ export default function Note({passedLink}:any){
 	// FINAL RENDER vvv
 
 	const debugVariables = { // name and values will float next to the note
-		//links: note.links
 	}
+
+	// need to use CSS or a separate object to handle all the microdifferences in presentation between Win and Mac
 
 	return(<>
 		{
@@ -576,13 +577,13 @@ export default function Note({passedLink}:any){
 								transform:`translate(-50%, -50%)`,	 backgroundColor:!link.inHeader?`${recolor(note.color,{lum:(link.canTravel?-5:+5)- 0})}`:undefined,
 							}}
 						>
-							<div style={{ // extra bounding box partly to speed up appearance of the selection outline
+							<div style={{
 								display:`flex`,
 								flexDirection:`row`,
 								outline:(selected && !link.inHeader)?`${4}px solid ${recolor(note.color,{lum:(link.canTravel?-5:+5)+5})}`:undefined,
 								lineHeight:`${link.inHeader?150:100}%`,
 							}}>
-								{ // bounding box for the icon if it has one
+								{ // bounding box for the icon, if it has one
 									__x
 									&& note.icon
 									&& <div style={{
@@ -593,8 +594,8 @@ export default function Note({passedLink}:any){
 										fontSize:`${link.inHeader?200:150}%`,
 									}}>
 										<span style={{
-											paddingTop:`${view.system.isWindows?0:(link.inHeader?3:0)}px`,
-											paddingBottom:`${!view.system.isWindows?0:(link.inHeader?3:3)}px`,
+											paddingTop:`${view.system.isWin?0:(link.inHeader?3:0)}px`,
+											paddingBottom:`${!view.system.isWin?0:(link.inHeader?3:3)}px`,
 										}}>
 											{note.icon}
 										</span>
@@ -611,10 +612,15 @@ export default function Note({passedLink}:any){
 									}}>
 										<span style={{
 											fontSize:`${link.inHeader?140:90}%`,
-											paddingTop:`${view.system.isWindows?0:(link.inHeader?3:0)}px`,
-											paddingBottom:`${view.system.isWindows?1:0}px`,
-											//paddingRight:`${0}px`,
-											paddingRight:`${( !(note.icon && link.canTravel)? 0: (link.inHeader?1:.5)*view.unit )/8}px`,
+											paddingBottom:`${view.system.isWin?1:0}px`,
+											paddingRight:`${
+												(!(note.icon && link.canTravel)?0:
+													view.unit
+														* (link.inHeader?
+															1 : 0.5
+														)
+												) / 8
+											}px`,
 											margin:`${link.canTravel?0:view.unit/4}px`
 										}}>
 											{
@@ -642,21 +648,43 @@ export default function Note({passedLink}:any){
 															display:`flex`,
 															justifyContent:`center`,
 															textAlign:`center`,
-															marginTop:`2px`,
 															resize:`none`,
 															overflow:link.canTravel?`hidden`:undefined,
-															fontSize:`110%`,
+															fontSize:`${
+																85
+																	+ (view.system.isMac?0:
+																		15
+																	)
+																	+ (view.system.isSafari?0:
+																		10
+																	)
+															}%`, // 85 100 110
 														}}
-														rows={link.canTravel?2:4}
-														cols={link.canTravel?(link.inHeader?11:8):28}
+														rows={
+															2
+																+ (link.canTravel?0:
+																	2
+																)
+														}
+														cols={
+															7
+																+ (link.canTravel?0:
+																	20
+																)
+																+ (!link.inHeader?0:
+																	3
+																)
+																+ (view.system.isSafari?0:
+																	1
+																)
+														}
 														ref={refText}
 														value={textInputValue}
 														onKeyDown={(e)=>{
 															if(
 																__x
-																&& e.key == "Enter" // suppress enter
-																&& !(e.shiftKey) // unless (holding shift)
-																// altKey is being eaten somewhere
+																&& e.key == "Enter" // suppress new line
+																&& !(e.shiftKey) // unless holding shift
 															){
 																e.preventDefault(); 
 																return true
