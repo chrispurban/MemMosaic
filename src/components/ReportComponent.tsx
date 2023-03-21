@@ -8,8 +8,6 @@ import {
 	useEffect,
 } from 'react';
 
-//import './../App.scss';
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Report(){
@@ -20,47 +18,46 @@ export default function Report(){
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
-	const oldDimensions = {
-		height: 0.00,
-	}
-
 	function getView(){
 
-//		if(oldDimensions.height != window.innerHeight){
-			oldDimensions.height = window.innerHeight
+		// visualViewport appears to be the only measure which is a true float, but is affected by the mobile keyboard appearing
+		// idea was to still use that but only update when another non-sensitive measure changed, though this hasn't been found yet
+		// if(oldDimensions.height != window.innerHeight){ oldDimensions.height = window.innerHeight
 
 			const pxGrid = 10
+
 			const pxAbsolute = (
-				//window.visualViewport?.height || 
-				window.innerHeight // window.innerHeight did not include decimals, visualViewport not immediately available
+				//window.visualViewport?.height || // visualViewport is not immediately available upon render
+				window.innerHeight
 			)
-			//console.log("pxAbsolute", pxAbsolute)
 	
-			const offset = ((
-				pxAbsolute
-			)	/ 2 // half screen, from center
-			)	/ pxGrid // pixel unit
+			const offset = (
+				((
+					pxAbsolute
+				)	/ 2 // half screen, from center
+				)	/ pxGrid // pixel unit
+			)
 			
-			const pxUnits = Math.floor(
-				offset
+			const pxUnits = (
+				Math.floor(
+					offset
+				)
 			)
-			//console.log("pxUnits", pxUnits)
 	
-			const pxExtra = ((
-				offset
-			)	% 1 // give back what floor cut off
-			)	* pxGrid // push back up to explicit pixels
-			//console.log("pxExtra", pxExtra)
-	
-			const foundView = {
+			const pxExtra = (
+				((
+					offset
+				)	% 1 // give back what floor cut off
+				)	* pxGrid // push back up to explicit pixels
+			)
+
+			const updatedView = {
 				...view,
 				pxAbsolute,
 				pxUnits,
 				pxExtra,
 			}
-			viewΔ(foundView)
-
-//		}
+			viewΔ(updatedView)
 
 	}
 	useEffect(()=>{getView()},[]);
@@ -95,25 +92,26 @@ export default function Report(){
 	useEffect(()=>{
 		const handleKey = (e:any)=>{
 			if(e.key == "Home"){
-				/*
 				console.clear()
-				console.log(`pocketID`,pocketID)
-				console.log(`selected`,selectedNodeID)
-				console.log(`view`,view)
-				console.log(`width`,window.outerWidth)
-				*/
 			}
 		}
 		window.addEventListener('keyup', handleKey);
 		return ()=>{window.removeEventListener('keyup', handleKey);};
 	},[
 		/*
-		atlas,
-		selectedNodeID,
-		view,
-		pocketID_atom
 		*/
 	])
+
+	/*
+	const panopticon = useRecoilSnapshot()
+	useEffect(()=>{const hk=(e:any)=>{if(e.key=="End"){
+		for (const node of panopticon.getNodes_UNSTABLE({isModified: true})) {
+			console.warn(node.key, panopticon.getLoadable(node));
+		}
+	}};window.addEventListener('keyup',hk);return()=>{window.removeEventListener('keyup',hk);};},[
+		panopticon
+	])
+	*/
 
   //////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -1,17 +1,19 @@
-import { __x, __o } from '../tools/defaults';
-import { useInterval, recolor, } from '../tools/functions';
-import Login from "./LoginComponent";
+import { __x, __o, } from '../tools/defaults';
+import { recolor, } from '../tools/functions';
+
 import { useState } from 'react';
-import { trpc, } from "../utils/trpc";
 import { useEffect } from 'react';
 import { useRef } from 'react';
+import { useDeviceSelectors } from 'react-device-detect';
+
 import { useRecoilState, useRecoilValue } from 'recoil';
+
 import {
 	NEO_canvasID_atom,
 	NEO_user_selector,
 	NEO_note_atom,
 } from "./RecoilComponent";
-import { useDeviceSelectors } from 'react-device-detect';
+import Login from "./LoginComponent";
 
 /*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
@@ -27,25 +29,9 @@ export default function Sidebar(){
 
 	const currentID = useRecoilValue(NEO_user_selector).current
 
-	/*
-	const {data: sessionData} = useSession()
-
-	const {data: secretMessage} = trpc.auth.getSecretMessage
-		.useQuery(
-			undefined, // no input
-			{enabled: sessionData?.user !== undefined},
-		);
-
-	const hello = trpc.example.hello
-		.useQuery(
-			{ text: "from tRPC" }
-		);
-	*/
-
-
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-	// right sidebar contains travel history, origin at top
+	// left sidebar contains travel history, origin at top
 	// origin will later be removed in favor of expanded view of the entire map
 
 	function Sidebar({left, content}:any){
@@ -156,14 +142,6 @@ export default function Sidebar(){
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 	return(<>
-		{/*
-				__o 
-				&& secretMessage
-				&& <span> - {secretMessage}</span>
-		}
-		{
-			hello.data ? hello.data.greeting : "Loading tRPC query..."
-		*/}
 		<Sidebar left={true} content={
 			<>
 
