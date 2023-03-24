@@ -44,7 +44,7 @@ export default function NEO_Canvas(){
 				className="canvas"
 				onDoubleClick={(e:any)=>{
 					if([...e.target.classList].includes("canvas")){
-						noteGeneration(e.shiftKey,{
+						noteGeneration((e.shiftKey || e.ctrlKey),{
 							x:Math.round((e.pageX-(window.innerWidth /2))/(10))/4,
 							y:Math.round((e.pageY-(window.innerHeight/2))/(10))/4,
 						})
