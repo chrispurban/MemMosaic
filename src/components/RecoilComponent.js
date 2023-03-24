@@ -122,7 +122,7 @@ export const NEO_canvasID_atom = atom({
 
 // uses the currently selected canvas note and sets up state for all its related notes
 // this process repeats every time the user navigates, but only the first time for each note
-// there are three redundant checks to prevent an infinite loop: the GET, the Canvas component, and the SET
+// there are three redundant checks to prevent an infinite loop: the GET, the SET, and the bottom of this component
 export const NEO_hydra_selector = selector({
 	key:'NEO_hydra_selector',
 	get: async ({ get }) => {
@@ -188,7 +188,7 @@ export const NEO_hydra_selector = selector({
 		}
 	},
 	// SET is not allowed to be asynchronous but can apparently still rely on an asynchronous selector so long as that selector has been initialized at least once; otherwise there's an error about pending state
-	// acquired data is simply what came from GET but routed through the Canvas component, as Recoil requires all SETs to begin in this fashion
+	// acquired data is simply what came from GET but routed through the component, as Recoil requires all SETs to begin in this fashion
 	set:({set, get}, strip)=>{ const acquired = strip.data.Note
 		if(acquired){
 		const 				canvas =					get(NEO_note_atom(acquired.uuid))
@@ -466,15 +466,17 @@ export const view_atom = atom({
 			divided:0,
 			remainder:0,
 		},
-		system:{
-
-		}
+		// system:{} // excluded because of a check on Spine for it
 	},
 });
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
+
+// only place here either:
+// - anchors which kickstart a selector
+// - effects which pass a selector's GET data to trigger another's SET
 
 export default function RecoilComponent(){
 	//console.log("recoil component rendered")

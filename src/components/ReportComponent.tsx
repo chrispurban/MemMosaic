@@ -11,8 +11,22 @@ import { useDeviceSelectors } from 'react-device-detect';
 export default function Report(){
 	//console.log("report component rendered")
 
-	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
 	const [ view, viewΔ ] = useRecoilState(view_atom);
+	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
+
+	useEffect(()=>{
+		console.log(selectors)
+		viewΔ((v:any)=>{return{
+			...v,
+			system:{
+				...selectors,
+				isMac:(selectors.isIOS || selectors.isIOS13 || selectors.isMacOs),
+				isWin:(selectors.isWindows || selectors.isWinPhone),
+				isTouch:(selectors.isMobile || selectors.isTablet),
+			}
+		}})
+	},[]);
+
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +37,7 @@ export default function Report(){
 		// if(oldDimensions.height != window.innerHeight){ oldDimensions.height = window.innerHeight
 
 			const absolute = (
-				//window.visualViewport?.height || // visualViewport is not immediately available upon render
+				window.visualViewport?.height || // visualViewport is not immediately available upon render
 				window.innerHeight
 			)
 	
@@ -58,21 +72,12 @@ export default function Report(){
 			}})
 
 	}
+	
 	useEffect(()=>{
 		getView()
-		viewΔ((v:any)=>{return{
-			...v,
-			system:{
-				isMac:(selectors.isIOS || selectors.isIOS13 || selectors.isMacOs),
-				isWin:(selectors.isWindows || selectors.isWinPhone),
-				isSafari:(selectors.isSafari),
-			}
-		}})
-	},[]);
-	useEffect(()=>{
 		window.addEventListener("resize", getView);
 		return () => window.removeEventListener("resize", getView);
-	});
+	},[]);
 
  	 //////////////////////////////////////////////////////////////////////////////////////////////
 
