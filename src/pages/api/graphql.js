@@ -52,7 +52,7 @@ const typeDefs = gql`
 			RETURN d AS User
 		""")
 		UUIDs: UUIDs! @cypher(statement: """
-			RETURN {linkID: apoc.create.uuid(), noteID: apoc.create.uuid()} as output
+			RETURN {linkID: randomUUID(), noteID: randomUUID()} as output
 		""")
 	}
 	type UUIDs {
@@ -121,7 +121,7 @@ const typeDefs = gql`
 		createUser(email: String!): User @cypher(statement: """
 			CREATE (
 				n:Note{
-					uuid:apoc.create.uuid(),
+					uuid:randomUUID(),
 					color: 'hsl(0,0%,90%)',
 					icon: '🧿',
 					text: 'Origin',
@@ -130,7 +130,7 @@ const typeDefs = gql`
 			)<-[:Begins_At]-(
 				u:User{
 					email:$email,
-					uuid:apoc.create.uuid()
+					uuid:randomUUID()
 				}
 			)-[:Owns]->(n)
 			SET u.current = n.uuid
