@@ -1,27 +1,21 @@
 import { __x, __o } from '../tools/defaults';
 
+import { view_atom, } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 
 import { useEffect, } from 'react';
 import { useDeviceSelectors } from 'react-device-detect';
-
-import {
-	view_atom,
-	NEO_user_selector,
-} from './RecoilComponent';
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Report(){
 	//console.log("report component rendered")
 
-	const [ view, viewΔ ] = useRecoilState<any>(view_atom);
+	const [ view, viewΔ ] = useRecoilState(view_atom);
 	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
-	const user = useRecoilValue(NEO_user_selector)
-
-	//////////////////////////////////////////////////////////////////////////////////////////////
 
 	useEffect(()=>{
+		console.log(selectors)
 		viewΔ((v:any)=>{return{
 			...v,
 			system:{
@@ -114,31 +108,18 @@ export default function Report(){
   //////////////////////////////////////////////////////////////////////////////////////////////
 
 	return(
-		__o
-		||(
-			__x
-			&& user.isAdmin
-			&& <div style={{
+		<>{
+			/*
+			<div style={{
 				position:`absolute`,
 				zIndex:5000,
-				backgroundColor:`cyan`,
-				outline:`1px solid black`,
-				left:`0px`,
-				top:`${view.frame+1}px`,
-				bottom:`${view.frame+1}px`,
-				minWidth:`50px`, maxWidth:`400px`,
+				backgroundColor:`green`,
+				left:'0', top:'0',
+				width:'200px', height:`${view.absolute-10}px`,
 			}}>
-				<pre style={{
-					overflowY:`auto`,
-					overflowX:`hidden`,
-				}}>
-					{JSON.stringify(view.system, null, '\r')}
-				</pre>
+
 			</div>
-		)
-		||(
-			__x
-			&& <></>
-		)
+			*/
+		}</>
 	)
 }
