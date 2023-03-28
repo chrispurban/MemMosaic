@@ -155,15 +155,6 @@ export default function Sidebar(){
 				<div>
 					User accounts are authenticated purely by email confirmation link. Changes will only persist with an account.
 				</div>
-				{
-					__o
-					&& <pre style={{
-					overflowY:`auto`,
-					overflowX:`hidden`,
-					}}>
-						{JSON.stringify(selectors, null, '\r')}
-					</pre>
-				}
 			</>
 		}/>
 	</>)
