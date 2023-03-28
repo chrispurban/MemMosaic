@@ -115,6 +115,7 @@ const typeDefs = gql`
 		origin: String
 		email: String
 		current: String
+		isAdmin: Boolean
 	}
 
 	type Mutation {
@@ -127,13 +128,16 @@ const typeDefs = gql`
 					text: 'Origin',
 					origin:true
 				}
-			)<-[:Begins_At]-(
+			)
+			WITH n
+			CREATE (
 				u:User{
 					email:$email,
-					uuid:randomUUID()
+					uuid:randomUUID(),
+					current:n.uuid,
+					origin:n.uuid
 				}
 			)-[:Owns]->(n)
-			SET u.current = n.uuid
 			RETURN u
 		""")
 
