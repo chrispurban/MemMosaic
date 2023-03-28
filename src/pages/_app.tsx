@@ -5,6 +5,7 @@ import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { RecoilRoot } from "recoil";
+import { Analytics } from "@vercel/analytics/react";
 
 const MyApp: AppType<{ session: Session | null }> = ({
 	Component,
@@ -14,6 +15,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		<SessionProvider session={session}>
 			<RecoilRoot>
 				<Component {...pageProps} />
+				<Analytics/>
 			</RecoilRoot>
 		</SessionProvider>
   	);

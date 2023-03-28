@@ -20,6 +20,7 @@
     "@trpc/next": "10.0.0-rc.4",
     "@trpc/react-query": "10.0.0-rc.4",
     "@trpc/server": "10.0.0-rc.4",
+    "@vercel/analytics": "^0.1.11",
     "apollo-server": "^3.11.1",
     "apollo-server-core": "^3.11.1",
     "apollo-server-micro": "^3.11.1",
