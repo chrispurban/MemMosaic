@@ -1,10 +1,5 @@
 import { __x, __o, } from '../tools/defaults';
 
-import { useRecoilState } from 'recoil';
-import { useDeviceSelectors } from 'react-device-detect';
-
-import { view_atom } from './RecoilComponent';
-
 import Recoil from "./RecoilComponent";
 import Canvas from "./CanvasComponent";
 import Frame from "./FrameComponent";
@@ -15,8 +10,6 @@ import { Suspense, useEffect } from 'react';
 
 export default function Spine(props:any){
 	//console.log("spine component rendered")
-
-	const [ view, viewΔ ] = useRecoilState<any>(view_atom);
 
 	return(<>
 		<Report/>
@@ -29,19 +22,25 @@ export default function Spine(props:any){
 			position:'relative',
 			width:'100vw', maxWidth:'100svw',
 			height:'100vh', maxHeight:'100svh',
-		}}>{
-			__x
-			&& view.system
-			&& (
+		}}>
+			{
 				__o
-				|| (view.system.isTouch && <Delay content = "Not ready for mobile... yet!"/>)
-				|| <Suspense fallback={<Delay content="Loading..."/>}>
-					<Canvas/>
-					<Frame/>
-					<Sidebar/>
-				</Suspense>
-			)
-		}</div>
+				||(
+					__x
+					&& !window.matchMedia("(pointer: fine)").matches
+					&& <Delay content = "Not ready for mobile... yet!"/>
+				)
+				||(
+					<Suspense fallback={
+						<Delay content="Loading..."/>
+					}>
+						<Canvas/>
+						<Frame/>
+						<Sidebar/>
+					</Suspense>
+				)
+			}
+		</div>
 	</>)
 }
 
