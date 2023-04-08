@@ -107,8 +107,8 @@ const typeDefs = gql`
 		y: Float!
 	}
 	type Length {
-		x: Int!
-		y: Int!
+		x: Float!
+		y: Float!
 	}
 	type User {
 		uuid: String
@@ -244,8 +244,8 @@ const typeDefs = gql`
 		y: Float!
 	}
 	input ReLength {
-		x: Int!
-		y: Int!
+		x: Float!
+		y: Float!
 	}
 `
 
