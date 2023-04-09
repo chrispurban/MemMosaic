@@ -1,5 +1,8 @@
 import { __x, __o, } from '../tools/defaults';
 
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { view_atom, NEO_user_selector } from './RecoilComponent';
+
 import Recoil from "./RecoilComponent";
 import Canvas from "./CanvasComponent";
 import Frame from "./FrameComponent";

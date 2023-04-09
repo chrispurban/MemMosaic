@@ -32,16 +32,22 @@ https://overreacted.io/making-setinterval-declarative-with-react-hooks/
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-export function recolor( hslString, {hue=0,sat=0,lum=0}={hue:number|string,sat:number|string,lum:number|string} ){
+export function recolor( hslString, {hue=0,sat=0,lum=0,alp=1}={hue:number|string,sat:number|string,lum:number|string,alp:string} ){
 	// adjustment is relative when passing a number, and explicit when passing a string
-	let newHue = typeof hue=='number'? hslString.split(",")[0].replace(/\D/g,'')*1+(hue?hue:0): hue*1;
-	let newSat = typeof sat=='number'? hslString.split(",")[1].replace(/\D/g,'')*1+(sat?sat:0): sat*1;
-	let newLum = typeof lum=='number'? hslString.split(",")[2].replace(/\D/g,'')*1+(lum?lum:0): lum*1;
+
+	let hsl = hslString.split(",")
+//	let new___ = typeof ___=='number'? hsl[_].replace(/\D/g,'')*1+(___?___:0): ___*1;
+	let newHue = typeof hue=='number'? hsl[0].replace(/\D/g,'')*1+(hue?hue:0): hue*1;
+	let newSat = typeof sat=='number'? hsl[1].replace(/\D/g,'')*1+(sat?sat:0): sat*1;
+	let newLum = typeof lum=='number'? hsl[2].replace(/\D/g,'')*1+(lum?lum:0): lum*1;
+	let newAlp = 																					alp*1;
+
 	return [
-		`hsl(`,
+		`hsla(`,
 			`${(newHue +360) %360},`, // wrap color wheel
 			`${newSat >100? 100:(newSat <0? 0: newSat)}%,`, // cap at 0 and 100
-			`${newLum >100? 100:(newLum <0? 0: newLum)}%`, // cap at 0 and 100
+			`${newLum >100? 100:(newLum <0? 0: newLum)}%,`, // cap at 0 and 100
+			`${newAlp}`,
 		`)`,
 	].join("")
 }
