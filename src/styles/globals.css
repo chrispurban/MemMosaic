@@ -14,3 +14,22 @@ a {
 * {
   box-sizing: border-box;
 }
+
+textarea {
+  border:none;
+  background:transparent;
+  resize:none;
+  outline:none;
+  overflow:hidden;
+  font:inherit;
+  line-height:inherit;
+  text-transform:inherit;
+  text-align:center;
+  letter-spacing:inherit;
+
+  width:100%;
+  padding:0;
+  margin:0;
+}
+
+textarea:focus {}

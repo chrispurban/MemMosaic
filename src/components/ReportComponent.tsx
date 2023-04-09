@@ -3,7 +3,7 @@ import { __x, __o } from '../tools/defaults';
 import { view_atom, } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 
-import { useEffect, } from 'react';
+import { useEffect, useState } from 'react';
 import { useDeviceSelectors } from 'react-device-detect';
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -14,8 +14,9 @@ export default function Report(){
 	const [ view, viewΔ ] = useRecoilState(view_atom);
 	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
 
+	
 	useEffect(()=>{
-		console.log(selectors)
+	//	console.log(selectors)
 		viewΔ((v:any)=>{return{
 			...v,
 			system:{
@@ -26,7 +27,7 @@ export default function Report(){
 			}
 		}})
 	},[]);
-
+	
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -15,7 +15,15 @@ export default function Login(){
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const textRef = useRef<HTMLTextAreaElement>(null);
 
-	useEffect(()=>{ if(!sessionData){const ref = textRef.current; if(ref != null){ref.focus()}} },[])	
+	const styleBox = {
+		padding:`10px`,
+		background:`white`,
+		fontSize:`120%`,
+		lineHeight:`120%`,
+		width:`240px`,
+	}
+
+	useEffect(()=>{ if(!sessionData){const ref = textRef.current; if(ref != null){ref.focus()}} },[])
 
 	async function handleSignIn(){
 		if(!sessionData){
@@ -50,11 +58,8 @@ export default function Login(){
 				&& sessionData
 				&& <div
 					style={{
-						backgroundColor:`white`,
-						height:`60px`,
-						padding:`10px`,
-						textAlign:`center`,
-						lineHeight:`120%`,
+						...styleBox,
+						textAlign:`center`, // this breaks when put into the object for some reason
 					}}
 				>
 					Logged in from {sessionData.user?.email}
@@ -72,13 +77,12 @@ export default function Login(){
 					&& <textarea
 					ref={textRef}
 					style={{
-						height:`60px`,
-						width:`240px`,
-						fontSize:`120%`,
-						padding:`10px`,
+						...styleBox,
 						textAlign:`center`,
+						height:`60px`,
 						resize:`none`,
 						overflow:`hidden`,
+						outline:`2px solid black`,
 					}}
 					onKeyDown={(e)=>{
 						if(

@@ -67,6 +67,7 @@ export const NEO_user_selector = selector({
 					origin
 					current
 					email
+					isAdmin
 				}
 			}`,
 			variables:{ email } // GraphQL typeDef is set to return the default user if email is blank
@@ -85,6 +86,7 @@ export const NEO_user_selector = selector({
 						origin
 						current
 						email
+						isAdmin
 					}
 				}`,
 				variables: { email }
@@ -191,8 +193,8 @@ export const NEO_hydra_selector = selector({
 	// acquired data is simply what came from GET but routed through the component, as Recoil requires all SETs to begin in this fashion
 	set:({set, get}, strip)=>{ const acquired = strip.data.Note
 		if(acquired){
-		const 				canvas =					get(NEO_note_atom(acquired.uuid))
-		if(				  !canvas.queried){		set(NEO_note_atom(acquired.uuid),{
+			const 			canvas =					get(NEO_note_atom(acquired.uuid))
+			if(			  !canvas.queried){		set(NEO_note_atom(acquired.uuid),{ // look into eliminating the blink on the first travel of a link
 				queried:		true,
 				uuid:			canvas.uuid				||						acquired.uuid,
 				color:		canvas.color			||						acquired.color,
@@ -264,8 +266,7 @@ export const NEO_link_atom = atomFamily({
 				x:				0,
 				y:				0,
 			},
-			notes:[
-			],
+			notes:			[],
 		}
 	},
 	effects:[
@@ -274,7 +275,6 @@ export const NEO_link_atom = atomFamily({
 		})}
 	]
 });
-
 
 export const NEO_UUID_atom = atom({
 	key: 'NEO_UUID_atom',
@@ -305,6 +305,8 @@ export const NEO_UUID_selector = selector({
 		set(NEO_UUID_atom,oldUUIDs) // triggers regeneration of UUIDs after 
 	}
 })
+
+// get a big list and delete entries as they're used?
 
 /////////////////////////
 /////////////////////////
@@ -361,7 +363,7 @@ export const NEO_create_selector = selector({
 		set(NEO_link_atom(UU.linkID),(priorValues)=>{return{
 			...priorValues,
 			position,
-			length:isLink?{x:3,y:1}:{x:6,y:2},
+			length:isLink?{x:3,y:1}:{x:6,y:1},
 			canTravel:isLink,
 			notes:[
 				canvasID,
@@ -470,6 +472,11 @@ export const view_atom = atom({
 	},
 });
 
+export const readyUUID_atom = atom({
+	key:"readyUUID_atom",
+	default:false,
+});
+
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
@@ -484,7 +491,6 @@ export default function RecoilComponent(){
 	const [ NEO_hydra , NEO_hydraΔ ] = useRecoilState(NEO_hydra_selector)
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
 	const [ canvas, canvasΔ ] = useRecoilState(NEO_note_atom(canvasID))
-
 	useEffect(()=> { // pass async GET to SET; other options internal to Recoil not available
 		if(!canvas.queried){NEO_hydraΔ(NEO_hydra)}
 	},[
@@ -492,6 +498,14 @@ export default function RecoilComponent(){
 	])
 
 	const anchorUUID = useRecoilValue(NEO_UUID_selector)
+	const [ readyUUID, readyUUIDΔ ] = useRecoilState(readyUUID_atom)
+	useEffect(()=> { // UUID was sometimes not available yet, reevaluate this issue later
+		if(anchorUUID && !readyUUID){
+			readyUUIDΔ(true)
+		}
+	},[
+		anchorUUID, readyUUID
+	])
 
 	return null
 }
