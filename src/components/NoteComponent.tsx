@@ -8,6 +8,7 @@ import {
   	NEO_note_atom,
 	NEO_create2_selector,
 	client,
+	selectedID_atom,
 } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import { useState, useEffect, useRef, } from 'react';
@@ -62,12 +63,14 @@ export default function Note({passedLink}:any){
 	// DATABASE INTERACTION vvv
 
 	// try to move as much of this as possible into Recoil later
+	// noteΔ to also perform noteΔΔ, and for creation also call linkΔ
+	// linkΔ to also perform linkΔΔ, and for deletion also call noteΔ
 
 	const canvasΔ = useSetRecoilState(NEO_note_atom(canvasID)) // only used to update when a deletion occurs
 	const userID = useSession()?.data?.user?.email // only used for queries
 
 	async function noteΔΔ(uuid:any, data:any){
-		//console.log("noteΔΔ triggered")
+		//console.log("noteΔΔ triggered", data)
 		if(note.text){ // started out with text, i.e. not newly generated
 			//console.log("noteΔΔ edit")
 			const editResponse = await client.mutate({ mutation:gql`
@@ -102,11 +105,14 @@ export default function Note({passedLink}:any){
 				}`,
 				variables:{
 					user:userID,	note:{...note, links:undefined, queried:undefined, ...data},
-					canvasID,		link:{...link, notes:undefined},
+					canvasID,		link:{...link, notes:undefined,
+						length:spaceInput.length // << !!
+						// is not passed in function, this needs to be consolidated/resolved
+						// is also being saved before it can be trimmed
+					},
 				}
 			});
 			if(creationResponse.errors){throw creationResponse.errors;}
-			console.warn("created", data)
 			return creationResponse
 		}
 	}
@@ -114,18 +120,14 @@ export default function Note({passedLink}:any){
 	async function linkΔΔ(uuid:any, data:any){
 		//console.log("linkΔΔ triggered with data:", data)
 		if(data){
+			// this receives the new length but will do nothing on first edit because the link doesn't exist yet
+			// for this reason, spaceInput is being passed to noteΔΔ
 			const editResponse = await client.mutate({ mutation:gql`
 				mutation editLink( $uuid:String, $data:LinkInput!, $userID:String ){
 					ReLink: editLink( uuid:$uuid, data:$data, userID:$userID ){
 						uuid
-						position{
-							x
-							y
-						}
-						length{
-							x
-							y
-						}
+						position{x,y}
+						length{x,y}
 						canTravel
 					}
 				}`,
@@ -134,7 +136,6 @@ export default function Note({passedLink}:any){
 				}
 			});
 			if(editResponse.errors){throw editResponse.errors;}
-			return editResponse
 		}
 		else{
 			//console.log("linkΔΔ delete")
@@ -157,7 +158,6 @@ export default function Note({passedLink}:any){
 					links:prevData.links.filter((xL:any)=>xL!==link.uuid),
 				}));
 			}
-			return deletionResponse
 		}
 	}
 	
@@ -176,7 +176,6 @@ export default function Note({passedLink}:any){
 			}
 		);
 		if(createResponse.errors){throw createResponse.errors;}
-		return createResponse
 	}
 
 
@@ -232,6 +231,7 @@ export default function Note({passedLink}:any){
 
 	const [ selected, selectedΔ ] = useState(false)
 
+
 	const [ dragEnabled, dragEnabledΔ ] = useState(true)
 	const [ dragActive, dragActiveΔ ] = useState(false)
 	useEffect(()=>{if(!dragEnabled){dragActiveΔ(false)}},[dragEnabled]);
@@ -248,33 +248,29 @@ export default function Note({passedLink}:any){
 		return()=>{document.removeEventListener('mousedown',handleClick)};
    },[protectedClickOut]);
 	
+	const selectedGlobalIDΔ = useSetRecoilState(selectedID_atom) // for letting other components know if an edit is happening
 
 	const [ textIsEditable, textIsEditableΔ ] = useState(0 == note.text.length); // kickstarts edit on a blank note
 	const [ textIsChanged, textIsChangedΔ ] = useState(false)
 	const [ textInputValue, textInputValueΔ ] = useState('');
 	useEffect(()=>{if(!textIsEditable){textIsChangedΔ(false)}},[textIsEditable]); // reevaluate whether this can be combined with the next effect
+	useEffect(()=>{textInputValueΔ(note.text)},[note]); // not just for editing but when travelling
 	useEffect(()=>{
-		//if(!textIsEditable){ // reevaluate why this check is necessary
-			textInputValueΔ(note.text)
-		//}
-	},[
-		note, // update on note for initial load and when travelling
-		//textIsEditable,
-	]);
-	useEffect(()=>{
-		if(textIsEditable && !textIsChanged){
+		// ensure when beginning an edit that the cursor is placed at the end
+		if(textIsEditable && !textIsChanged){ // only do at start
 			const end = textInputValue.length
 			refText.current.setSelectionRange(end, end)
 			refText.current.focus()
 			selectedΔ(true)
 		}
 	},[
-		textIsChanged, // added to only jump to the end at start
+		textIsChanged,
 		textIsEditable,
-		textInputValue, // relying on reloaded value from drag, otherwise interrupts midway edits
+		textInputValue,
 		dragActive, // refocus if dragged while editing; should change to specifically when drag stops
 	]);
 	
+
 	const [ spaceInput, spaceInputΔ ] = useState({length:link.length});
 	useEffect(()=>{
 		const textArea = refText.current;
@@ -289,13 +285,13 @@ export default function Note({passedLink}:any){
 		}
 	},[textInputValue, textIsEditable, link, view, refText]);
 
-	const [ isHidden, isHiddenΔ ] = useState(false)
-
 	// FLAGS FOR EDITING TEXT AND REPOSITIONING ^^^
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MAIN EFFECTS FOR EDITING TEXT AND REPOSITIONING vvv
+
+	const [ isHidden, isHiddenΔ ] = useState(false) // used during deletion
 	
 	useEffect(()=>{
 		const handleKey = (e:any)=>{
@@ -325,9 +321,9 @@ export default function Note({passedLink}:any){
 							&& !(0==newText.length && link.canTravel)
 						){
 							noteΔ( (n:any)=>{return{...n,text:newText}} ) // change what was in state
-							noteΔΔ( note.uuid, {text:newText} ) // modify it on the server // if a new note, doesn't exist on the database until here
-							// textInputValueΔ(newText) // no longer necessary when you have an effect that sets this when the note updates
 							linkΔ( (l:any)=>{return{...l,length:spaceInput.length}} )
+
+							noteΔΔ( note.uuid, {text:newText} ) // modify it on the server // if a new note, doesn't exist on the database until here
 							linkΔΔ( link.uuid, {length:spaceInput.length} )
 				  		}
 				  		else if(e.key == "Escape"){
@@ -335,7 +331,10 @@ export default function Note({passedLink}:any){
 						}
 					}
 					textIsEditableΔ(false)
-					if(selected){selectedΔ(false)}
+					if(selected){
+						selectedΔ(false)
+						selectedGlobalIDΔ("")
+					}
 				}
 		  	}
 		  	if(dragActive){
@@ -344,8 +343,9 @@ export default function Note({passedLink}:any){
 						case "Delete":
 							pocketIDΔ("")
 						case "Escape":
-							selectedΔ(false)
 							dragEnabledΔ(false)
+							selectedΔ(false)
+							selectedGlobalIDΔ("")
 						break;
 					}
 				}
@@ -358,6 +358,7 @@ export default function Note({passedLink}:any){
 					case "Escape":
 						dragEnabledΔ(false);
 						selectedΔ(false);
+						selectedGlobalIDΔ("")
 					break;
 					}
 				}
@@ -390,32 +391,33 @@ export default function Note({passedLink}:any){
 	useEffect(()=>{
 		const handleClick = (e:any)=>{
 			if(refComponent.current && !refComponent.current.contains(e.target)){ // clicked outside component
-				// if(menuPop == linkMaster.id){menuPopΔ(null)}
-				if(textIsEditable){
-					if(!protectedClickOut){ // not simply highlighting from inside the textbox
-						const newText = textInputValue.trim()
-						if(0==newText.length){ // was left blank
-							if(
-								__o
-								|| (link.canTravel && 0==note.text.length) // started as a blank canvas
-								|| !link.canTravel // isn't a canvas at all
-							){
-								isHiddenΔ(true)
-								linkΔΔ(link.uuid, null)
-							} // blank counts as final, get rid of it
-							else{
-								textInputValueΔ(note.text)
-							} // revert back, do nothing
-						}
-						else if(textIsChanged){
-							noteΔ( (n:any)=>{return{...n, text:newText}} )
-							noteΔΔ( note.uuid, {text:newText} ) // if a new note, doesn't exist on the database until here
-							// textInputValueΔ(newText) // no longer necessary when you have an effect that sets this when the note updates
-							linkΔ( (l:any)=>{return{...l,length:spaceInput.length}} )
-							linkΔΔ( link.uuid, {length:spaceInput.length} )
-						}
-						textIsEditableΔ(false);
-						selectedΔ(false);
+				// if(menuPop == linkMaster.id){menuPopΔ(null)} // mobile control
+				if(textIsEditable && !protectedClickOut){ // not simply highlighting from inside the textbox
+					const newText = textInputValue.trim()
+					if(0==newText.length){ // was left blank
+						if(
+							__o
+							|| (link.canTravel && 0==note.text.length) // started as a blank canvas
+							|| !link.canTravel // isn't a canvas at all
+						){
+							isHiddenΔ(true)
+							linkΔΔ(link.uuid, null)
+						} // blank counts as final, get rid of it
+						else{
+							textInputValueΔ(note.text)
+						} // revert back, do nothing
+					}
+					else if(textIsChanged){
+						noteΔ( (n:any)=>{return{...n, text:newText}} )
+						linkΔ( (l:any)=>{return{...l,length:spaceInput.length}} )
+
+						noteΔΔ( note.uuid, {text:newText} ) // if a new note, doesn't exist on the database until here
+						linkΔΔ( link.uuid, {length:spaceInput.length} )
+					}
+					textIsEditableΔ(false);
+					selectedΔ(false);
+					if(![...e.target.offsetParent.classList].includes("note")){
+						selectedGlobalIDΔ("");
 					}
 				}
 			}
@@ -446,19 +448,22 @@ export default function Note({passedLink}:any){
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DELAYED ACTIONS vvv
 
+	// changing canvasID during onStop caused an unmounting error; onStop returning null was ineffective
 	const [ navigate, navigateΔ ] = useState<any>({to:"", save:false}); // useState<{to:string, save?:boolean}>({to:""});
-	useEffect(()=>{ // changing canvasID during onStop caused an unmounting error; onStop returning null was ineffective
+	useEffect(()=>{
 		if(navigate.to){
-			if(navigate.save){pocketIDΔ(canvasID)} // travelling through the pocket exchanges it with the destination
+			if(navigate.save){pocketIDΔ(canvasID)} // exchange pocket with destination
 			canvasIDΔ(navigate.to)
 			selectedΔ(false)
+			selectedGlobalIDΔ("")
 			navigateΔ({to:"", save:false})
 		}
 	},[
+		navigate,
 		canvasID,
 		canvasIDΔ,
-		navigate,
-		pocketIDΔ
+		pocketIDΔ,
+		selectedGlobalIDΔ,
 	]);
 
 	// DELAYED ACTIONS ^^^
@@ -475,6 +480,7 @@ export default function Note({passedLink}:any){
 	//		&& !(inPocket && !event.shiftKey) // not a pocket node unless trying to edit
 		){
 			selectedΔ(true)
+			selectedGlobalIDΔ(link.uuid) // for letting other components know
 		}
 		if(refText.current && refText.current.contains(event.target)){ // don't drag if clicking textbox
 			return(false)
@@ -504,7 +510,7 @@ export default function Note({passedLink}:any){
 	function onStop(event:any ,data:any){ //console.log(`${proxyNode.id} stop detected`)
 		if(dragActive){
 			dragActiveΔ(false)
-			if(selected && !textIsEditable){selectedΔ(false)} // deselect if not still editing // make an effect?
+			if(selected && !textIsEditable){selectedΔ(false), selectedGlobalIDΔ("")} // deselect if not still editing // make an effect?
 
 			const insideFrame = (view.height.absolute/2)-(view.frame+2)-(.5*view.unit*spaceInput.length.y) // + 2 is from the outline
 			if(data.y < -insideFrame){ // higher than top frame
@@ -570,14 +576,15 @@ export default function Note({passedLink}:any){
 	return(<>
 		{
 			__x
-			&& note//.color // can remove check entirely?
+			&& note // can remove check entirely?
 			&& (!(link.inPocket || link.inHeader) || view) // if it's an offset position, don't render until you get the view dimensions
 			&& !isHidden // don't render if you're in the middle of deleting it
 			&& (
 				<div
+					// area the note can be dragged within
 					ref={refComponent}
 					style={{												overflow:`hidden`,									
-						...styleFlex,									pointerEvents:`none`,									
+						...styleFlex,									pointerEvents:`none`,
 						textAlign:`center`,							userSelect:`none`,										
 						
 						left:`${50}%`,		width:`${100}%`,		position:`absolute`,
@@ -615,7 +622,7 @@ export default function Note({passedLink}:any){
 							style={{pointerEvents:`auto`,}}
 						>
 							<div
-								// className="note" // if(![...e.target.offsetParent.classList].includes("note")){}
+								className="note"
 								style={{
 									position:`absolute`,
 									transform:`translate(-50%,-50%)`,
@@ -655,26 +662,28 @@ export default function Note({passedLink}:any){
 								{
 									__x // bounding box for the text
 									&& (
-										<div style={{
-											...styleFlex,
-											width:`${
-												+ (view.unit * (link.length.x - (note.icon?1:0)) )
-												- (borderMargin / (note.icon?2:1))
-											}px`,
-											height:`${
-												+(view.unit * (link.canTravel?1:spaceInput.length.y) )
-												-(link.inHeader?0:borderMargin)
-											}px`,
-											margin:`${borderMargin/2}px`,		
-											fontWeight:link.inHeader?`bold`:`normal`,
-											fontSize:`${link.inHeader?140:90}%`,
+										<div
+											style={{
+												...styleFlex,
+												width:`${
+													+ (view.unit * (link.length.x - (note.icon?1:0)) )
+													- (borderMargin / (note.icon?2:1))
+												}px`,
+												height:`${
+													+(view.unit * (link.canTravel?1:spaceInput.length.y) )
+													-(link.inHeader?0:borderMargin)
+												}px`,
+												margin:`${borderMargin/2}px`,		
+												fontWeight:link.inHeader?`bold`:`normal`,
+												fontSize:`${link.inHeader?140:90}%`,
 
-											...(note.icon?{ marginLeft:'0px', }:{}),
-											...(textIsEditable?{ outline:`2px solid black`, background:`${recolor(note.color,{lum:(link.canTravel?-0:+10)})}`, }:{}),
-										}}>
+												...(note.icon?{ marginLeft:'0px', }:{}),
+												...(textIsEditable?{ outline:`2px solid black`, background:`${recolor(note.color,{lum:(link.canTravel?-0:+10)})}`, }:{}),
+											}}
+										>
 											{
 												__o
-												||( 
+												||(
 													__x // normal text
 													&& !textIsEditable
 													&&(
@@ -695,21 +704,24 @@ export default function Note({passedLink}:any){
 													__x // editing text
 													&&(
 														<textarea
-														ref={refText}
-														value={textInputValue}
-														rows={link.canTravel?2:1}
-														onKeyDown={(e)=>{
-															if(
-																__x
-																&& e.key == "Enter" // suppress new line
-																&& !(e.shiftKey || e.ctrlKey || e.altKey) // unless holding modifier; ctrl and alt are currently being eaten somewhere
-															){ e.preventDefault(); return true }
-														}}
-														onChange={(e)=>{
-															textInputValueΔ(e.target.value);
-															textIsChangedΔ(true)
-														}}
-													/>
+															// now that style is controlled, could use textarea only; remaining problem is dealing with sizing on links
+															// readOnly={!textIsEditable}
+															// style={{pointerEvents:(textIsEditable?`all`:`none`)}}
+															ref={refText}
+															value={textInputValue}
+															rows={link.canTravel?2:1}
+															onKeyDown={(e)=>{
+																if(
+																	__x
+																	&& e.key == "Enter" // suppress new line
+																	&& !(e.shiftKey || e.ctrlKey || e.altKey) // unless holding modifier; ctrl and alt are currently being eaten somewhere
+																){ e.preventDefault(); return true }
+															}}
+															onChange={(e)=>{
+																textInputValueΔ(e.target.value);
+																textIsChangedΔ(true)
+															}}
+														/>
 													)
 												)
 											}

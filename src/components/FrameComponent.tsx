@@ -4,10 +4,11 @@ import {
 	NEO_canvasID_atom,
 	NEO_note_atom,
 	NEO_pocketID_atom,
+	selectedID_atom,
 } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 import {
-	useRef,
+	useRef, useEffect,
 } from 'react';
 import React from 'react';
 
@@ -23,22 +24,39 @@ export default function Frame(){
 
 	const [ pocketID, pocketIDΔ ] = useRecoilState(NEO_pocketID_atom);
 
-	const textRef = useRef(null);
-	const componentRef = useRef(null);
-
 	const baseStyle:React.CSSProperties = {
 		... canvasNote.color?{
-			outline:`2px solid ${recolor(canvasNote.color, {lum:-30,sat:0,hue:0,})}`,
-			backgroundColor:recolor(canvasNote.color, {lum:-10,sat:0,hue:0,}),
+			outline:`2px solid ${recolor(canvasNote.color, {lum:-30})}`,
+			backgroundColor:recolor(canvasNote.color, {lum:-10}),
 		}:{},
-		display:`flex`,
+		display:`flex`, alignItems:`center`, justifyContent:`center`,
 		position:`absolute`,
 		left:`0px`, right:`0px`,
 		height:`60px`,
-		alignItems:`center`, justifyContent:`center`,
 		userSelect:`none`,
 		zIndex:4,
 	}
+
+	const selectedGlobalID = useRecoilValue(selectedID_atom)
+	useEffect(()=>{
+		const handleKey = (e:any)=>{
+			if(pocketID && !selectedGlobalID){
+				if(e.key == "End"){
+					const swapID = canvasID
+					canvasIDΔ(pocketID)
+					pocketIDΔ(swapID)
+				}
+				else if(e.key == "Escape" || e.key == "Delete"){
+					pocketIDΔ("")
+				}
+			}
+		};			window.addEventListener(	'keyup', handleKey);
+		return ()=>{window.removeEventListener('keyup', handleKey);};
+	},[
+		pocketID,
+		canvasID,
+		selectedGlobalID,
+	])
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,17 +66,19 @@ export default function Frame(){
 			{
 				__x
 				&& canvasNote.text // don't expose before first hydra has run
-				&& <Note {...{passedLink:{
-					uuid:null,
-					position:{x:0,y:-1},
-					length:{
-						x:3+(3*3)/4,
-						y:1+(1*1)/4,
-					},
-					notes:[canvasID],
-					canTravel:true,
-					inHeader:true,
-				}}}/>
+				&&(
+					<Note {...{passedLink:{
+						uuid:null,
+						position:{x:0,y:-1},
+						length:{
+							x:3+(3*3)/4,
+							y:1+(1*1)/4,
+						},
+						notes:[canvasID],
+						canTravel:true,
+						inHeader:true,
+					}}}/>
+				)
 			}
 			<div
 				style={{

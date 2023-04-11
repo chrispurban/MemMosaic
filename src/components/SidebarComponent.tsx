@@ -3,7 +3,7 @@ import { recolor, } from '../tools/functions';
 
 import { useState } from 'react';
 import { useEffect } from 'react';
-import { useRef } from 'react';
+import { useRef, useCallback, } from 'react';
 import { useDeviceSelectors } from 'react-device-detect';
 
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -13,6 +13,7 @@ import {
 	NEO_user_selector,
 	NEO_note_atom,
 	NEO_pocketID_atom,
+	selectedID_atom,
 } from "./RecoilComponent";
 import Login from "./LoginComponent";
 
@@ -24,18 +25,46 @@ export default function Sidebar(){
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
 	const [ pocketID, pocketIDΔ ] = useRecoilState(NEO_pocketID_atom)
 	const [ note, noteΔ ] = useRecoilState(NEO_note_atom(canvasID))
+	//console.log("note that we are on", note)
 
 	const [ selectors, data ] = useDeviceSelectors(window.navigator.userAgent)
 	const { isWindows } = selectors
 
-	const currentID = useRecoilValue(NEO_user_selector).current
+	const user = useRecoilValue(NEO_user_selector)
+	//console.log("user data", user)
+
+	//const currentID = useRecoilValue(NEO_user_selector).current
+	//const originID = useRecoilValue(NEO_user_selector).origin
+
+	
+	const seekOrigin = useCallback(() => {
+		if(canvasID == user.origin){ // you're on the origin
+			pocketIDΔ("")
+		}
+		else{
+			if(!pocketID || pocketID == user.origin){ // nothing in pocket, save current location as the return point
+				pocketIDΔ(canvasID)
+			}
+			canvasIDΔ(user.origin) // go to origin
+		}
+	}, [canvasID, pocketID, user]);
+
+	const selectedGlobalID = useRecoilValue(selectedID_atom)
+	useEffect(()=>{
+		const handleKey = (e:any)=>{
+			if(!selectedGlobalID && e.key == "Home"){ seekOrigin() }
+		};				window.addEventListener(	'keyup', handleKey);
+		return ()=>{window.removeEventListener('keyup', handleKey);};
+	},[seekOrigin, selectedGlobalID])
+
+
 
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 	// left sidebar contains travel history, origin at top
 	// origin will later be removed in favor of expanded view of the entire map
 
-	function Sidebar({left, content}:any){
+	function SidebarContent({left, content}:any){
 		const [ expanded, expandedΔ ] = useState(false)
 		const componentRef = useRef<HTMLDivElement>(null)
 
@@ -47,7 +76,7 @@ export default function Sidebar(){
 			};
 			const handleClick = (e:any)=>{
 				if(expanded){
-					if(componentRef.current && !componentRef.current.contains(e.target)){ // clicked outside component
+					if(componentRef.current && !componentRef.current.contains(e.target)){
 						expandedΔ(false)
 					}
 				}
@@ -59,7 +88,7 @@ export default function Sidebar(){
 		// HANDLE CLICKING OUTSIDE COMPONENT ^^^
 		/////////////////////////////////////////////////////////////////////////////////////
 		
-		const user = useRecoilValue(NEO_user_selector)
+
 
 		return(<>
 			{
@@ -69,8 +98,13 @@ export default function Sidebar(){
 					ref={componentRef}
 					style={{
 						position:'absolute',
+
+						//...(expanded?{width:'260px',}:{}),
+
 						right:!left?`${expanded?0:10}px`:undefined,
 						left:left?`${expanded?0:10}px`:undefined,
+
+
 						top:`${expanded?0:10}px`,
 						...(expanded?{width:'260px', height:`100%`, }:{}),
 						zIndex:'1000',
@@ -78,8 +112,8 @@ export default function Sidebar(){
 						display:`flex`,
 						flexDirection:`column`,
 						gap:`12px`,
-						backgroundColor:recolor(note.color, {hue:0, lum:(-30), sat:0}),
-						outline:`2px solid ${recolor(note.color, {hue:0, lum:(-40), sat:0})}`,
+						backgroundColor:recolor(note.color, {lum:(-30)}),
+						outline:`2px solid ${recolor(note.color, {lum:(-40)})}`,
 					}}
 				>
 					<button
@@ -91,22 +125,13 @@ export default function Sidebar(){
 							alignItems:`center`, justifyContent:`center`,
 							textAlign:`center`,
 							border:`0px`,
-							backgroundColor:recolor(note.color, {hue:0, lum:(-20), sat:0}),
-							outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40),hue:0,sat:0})}`,
+							background:recolor(note.color, {hue:0, lum:(-20), sat:0}),
+							outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40)})}`,
 							userSelect:`none`,
 						}}
 						onClick={(e)=>{
 							if(left){ // temporary behavior; once history is added, this will become the first option within it
-								canvasIDΔ(currentID)
-								if(canvasID == user.origin){ // you're on the origin
-									pocketIDΔ("")
-								}
-								else{
-									if(!pocketID || pocketID == user.origin){ // nothing in pocket, save current location as the return point
-										pocketIDΔ(canvasID)
-									}
-									canvasIDΔ(user.origin) // go to origin
-								}
+								seekOrigin()
 							}
 							else{
 								expandedΔ((v:boolean)=>!v)
@@ -144,12 +169,12 @@ export default function Sidebar(){
 	/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 	return(<>
-		<Sidebar left={true} content={
+		<SidebarContent left={true} content={
 			<>
 
 			</>
 		}/>
-		<Sidebar left={false} content={
+		<SidebarContent left={false} content={
 			<>
 				<Login/>
 				<div>

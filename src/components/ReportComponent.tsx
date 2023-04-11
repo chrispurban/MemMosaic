@@ -82,6 +82,7 @@ export default function Report(){
 
  	 //////////////////////////////////////////////////////////////////////////////////////////////
 
+	/*
 	useEffect(()=>{
 		const handleKey = (e:any)=>{
 			if(e.key == "Home"){
@@ -91,9 +92,8 @@ export default function Report(){
 		window.addEventListener('keyup', handleKey);
 		return ()=>{window.removeEventListener('keyup', handleKey);};
 	},[
-		/*
-		*/
 	])
+	*/
 
 	/*
 	const panopticon = useRecoilSnapshot()
