@@ -204,10 +204,17 @@ const typeDefs = gql`
 			DETACH DELETE n
 		""")
 
+
+		setCurrent( userID:String, noteID:String ): Boolean @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
+			SET u.current = n.uuid
+		""")
+
+
 		deleteLink(linkID: String, noteID: String, userID: String): Boolean @cypher(statement: """
 			MATCH (u:User {email: $userID})-[:Owns]->(n:Note{uuid: $noteID})-[l:Link {uuid: $linkID}]-()
 			DETACH DELETE l
-			WITH n, ((n)-[:Link]-() OR u.origin = n.uuid) AS stillConnected
+			WITH n, ((n)-[:Link]-() OR u.origin = n.uuid OR u.current = n.uuid) AS stillConnected
 			WHERE NOT stillConnected
 			DETACH DELETE n
 			RETURN stillConnected

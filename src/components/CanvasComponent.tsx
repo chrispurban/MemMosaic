@@ -3,7 +3,6 @@ import {
 	NEO_canvasID_atom,
 	NEO_note_atom,
 	NEO_create_selector,
-	readyUUID_atom,
 } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, useRecoilValueLoadable, useRecoilStateLoadable, useRecoilCallback, } from "recoil";
 import {
@@ -21,7 +20,6 @@ export default function NEO_Canvas(){
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
 	const [ canvas, canvasΔ ] = useRecoilState(NEO_note_atom(canvasID))
 
-	const readyUUID = useRecoilValue(readyUUID_atom)
 	const noteGeneration = useRecoilCallback(({ set }) => async ( isLink:any, position:any )=>{
 		console.log(`doubleclick detected in empty canvas at x:${position.x} y:${position.y}`);
 		set<any>(NEO_create_selector,{
@@ -36,7 +34,6 @@ export default function NEO_Canvas(){
 	return(<>
 		{
 			__x
-			&& readyUUID
 			&& canvas.color
 			&& <div
 				style={{

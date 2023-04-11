@@ -15,12 +15,13 @@ export default function Login(){
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const textRef = useRef<HTMLTextAreaElement>(null);
 
-	const styleBox = {
+	const styleBox:React.CSSProperties = {
 		padding:`10px`,
 		background:`white`,
 		fontSize:`120%`,
 		lineHeight:`120%`,
 		width:`240px`,
+		textAlign:`center`,
 	}
 
 	useEffect(()=>{ if(!sessionData){const ref = textRef.current; if(ref != null){ref.focus()}} },[])
@@ -59,7 +60,6 @@ export default function Login(){
 				&& <div
 					style={{
 						...styleBox,
-						textAlign:`center`, // this breaks when put into the object for some reason
 					}}
 				>
 					Logged in from {sessionData.user?.email}
@@ -78,7 +78,6 @@ export default function Login(){
 					ref={textRef}
 					style={{
 						...styleBox,
-						textAlign:`center`,
 						height:`60px`,
 						resize:`none`,
 						overflow:`hidden`,

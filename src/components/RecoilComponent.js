@@ -56,7 +56,7 @@ export const NEO_user_selector = selector({
 	get: async ({get})=>{
 		const userSession = await getSession()
 		const email = userSession?.user?.email
-		console.log("user session obtained", userSession)
+		//console.log("user session obtained", userSession)
 		
 		let user
 		const readResponse = await client.query({ // see if they have a user account yet
@@ -103,22 +103,45 @@ export const NEO_user_selector = selector({
 export const NEO_canvasID_atom = atom({
 	key: 'NEO_canvasID_atom',
 	default: selector({
-	  key: 'UserInfo/Default',
-	  get: ({get}) => {
-			return get(NEO_user_selector).current;
+		key: 'UserInfo/Default',
+		get: ({get}) => {
+			const user = get(NEO_user_selector)
+			if(user.current){
+				return user.current
+				// to even try and delete the current would require a severe delay in updating this property, as there's no mechanism for deleting the one you're looking at
+				// even still, protection has been added to the deleteLink mutation
+			}
+			else{
+				return user.origin
+			}
 		},
 	}),
 	effects:[
-		({onSet})=>{
-			onSet( (newCanvasID)=>{
-				console.warn(`NAVIGATING to canvas for note ${newCanvasID}`)
-				// additional effect to write to user.current
-			} );
-		}
+		({ onSet, getPromise }) => {
+			getPromise(NEO_user_selector).then(user => {
+				onSet(async (newCanvasID)=>{
+					console.warn(`NAVIGATING to canvas for note ${newCanvasID}`)
+					const setResponse = await client.mutate({ mutation:gql`
+						mutation setCurrent( $userID: String, $noteID: String ){
+							setCurrent( userID: $userID, noteID: $noteID )
+						}`,
+						variables:{ noteID:newCanvasID , userID:user.email }
+					});
+				});
+			});
+		},
 	]
- });
+});
 
 // if you come in via hyperlink it should query with that note
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const selectedID_atom = atom({
+	key: 'selectedID_atom',
+	default: "",
+});
+// purpose to allow you to track whether a note is currently being edited; 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -144,14 +167,8 @@ export const NEO_hydra_selector = selector({
 						text
 						linksIn{
 							uuid
-							position{
-								x
-								y
-							}
-							length{
-								x
-								y
-							}
+							position{x,y}
+							length{x,y}
 							canTravel
 							destination{
 								uuid
@@ -162,14 +179,8 @@ export const NEO_hydra_selector = selector({
 						}
 						linksOut{
 							uuid
-							position{
-								x
-								y
-							}
-							length{
-								x
-								y
-							}
+							position{x,y}
+							length{x,y}
 							canTravel
 							destination{
 								uuid
@@ -349,7 +360,7 @@ export const NEO_create_selector = selector({
 		set(NEO_note_atom(UU.noteID),(priorValues)=>{return{
 			...priorValues,
 			color:recolor(canvas.color, { // deviates from canvas if it's a link
-				hue:isLink?-(Math.floor(Math.random()*(canvas.uuid == user.origin?360:76)) + 15):0, // would be more appropriate to look at whether the saturation was zero
+				hue:isLink?-(Math.floor(Math.random()*(canvas.uuid == user.origin?360:91)) + 30):0, // would be more appropriate to look at whether the saturation was zero
 				sat:isLink?`${Math.floor(Math.random() * 11) + 30}`:0,
 				lum:isLink?`${Math.floor(Math.random() * 11) + 80}`:0, // should cap at 90, is presented 5 higher
 			}),
@@ -472,11 +483,6 @@ export const view_atom = atom({
 	},
 });
 
-export const readyUUID_atom = atom({
-	key:"readyUUID_atom",
-	default:false,
-});
-
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
@@ -498,14 +504,6 @@ export default function RecoilComponent(){
 	])
 
 	const anchorUUID = useRecoilValue(NEO_UUID_selector)
-	const [ readyUUID, readyUUIDΔ ] = useRecoilState(readyUUID_atom)
-	useEffect(()=> { // UUID was sometimes not available yet, reevaluate this issue later
-		if(anchorUUID && !readyUUID){
-			readyUUIDΔ(true)
-		}
-	},[
-		anchorUUID, readyUUID
-	])
 
 	return null
 }
