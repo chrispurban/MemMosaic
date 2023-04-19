@@ -220,7 +220,7 @@ export const NEO_hydra_selector = selector({
 						].map((xQL)=>{
 							set(NEO_link_atom(		xQL.uuid),(priorLink)=>{return{
 								...priorLink,		...xQL,
-								position:{			...xQL.position,		__typename:undefined},
+								position:{			...xQL.position,		__typename:undefined}, //position:({__typename, ...rest} = xQL.position, rest),
 								length:{				...xQL.length,			__typename:undefined},
 								notes:[
 															xQL.destination.uuid,
@@ -232,7 +232,7 @@ export const NEO_hydra_selector = selector({
 							set(NEO_note_atom(		xQL.destination.uuid),(priorNote)=>{return{
 								...priorNote,		...xQL.destination,
 								__typename:				undefined,
-							}})	
+							}})
 							return xQL.uuid
 						})
 					])		
@@ -248,10 +248,10 @@ export const NEO_note_atom = atomFamily({
 	key: 'NEO_note_atom',
 	default: uuid => {
 		return {
-			uuid:			uuid,
-			color:		"",
-			text:			"",
-			icon:			"",
+			uuid:			`${uuid}`,
+			color:		``,
+			text:			``,
+			icon:			``,
 			links:		[],
 			queried:		false,
 		}
@@ -356,6 +356,8 @@ export const NEO_create_selector = selector({
 		let user = get(NEO_user_selector)
 
 		const UU = get(NEO_UUID_selector)
+
+		set(selectedID_atom, UU) // otherwise functions won't know you're editing something like they normally would from click handlers
 
 		set(NEO_note_atom(UU.noteID),(priorValues)=>{return{
 			...priorValues,
