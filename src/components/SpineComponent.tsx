@@ -15,17 +15,16 @@ export default function Spine(props:any){
 	//console.log("spine component rendered")
 
 	return(<>
-		<Report/>
-
-		<Suspense fallback={<></>}>
-			<Recoil/>
-		</Suspense>
-
 		<div style={{
 			position:'relative',
 			width:'100vw', maxWidth:'100svw',
 			height:'100vh', maxHeight:'100svh',
 		}}>
+			{ // this fallback will activate every time the hydra runs
+				<Suspense fallback={<></>}>
+					<Recoil/>
+				</Suspense>
+			}
 			{
 				__o
 				||(
@@ -37,6 +36,7 @@ export default function Spine(props:any){
 					<Suspense fallback={
 						<Delay content="Loading..."/>
 					}>
+						<Report/>
 						<Canvas/>
 						<Frame/>
 						<Sidebar/>

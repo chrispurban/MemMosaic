@@ -37,27 +37,6 @@ export default function Frame(){
 		zIndex:4,
 	}
 
-	const selectedGlobalID = useRecoilValue(selectedID_atom)
-	useEffect(()=>{
-		const handleKey = (e:any)=>{
-			if(pocketID && !selectedGlobalID){
-				if(e.key == "End"){
-					const swapID = canvasID
-					canvasIDΔ(pocketID)
-					pocketIDΔ(swapID)
-				}
-				else if(e.key == "Escape" || e.key == "Delete"){
-					pocketIDΔ("")
-				}
-			}
-		};			window.addEventListener(	'keyup', handleKey);
-		return ()=>{window.removeEventListener('keyup', handleKey);};
-	},[
-		pocketID,
-		canvasID,
-		selectedGlobalID,
-	])
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	function FrameTop(){
@@ -95,39 +74,6 @@ export default function Frame(){
 
 	function FrameBottom(){
 		
-		// if this gets moved up into the main frame function, drag effect will get stuck, requiring two clicks
-		// apparently this mixing with pocketID doesn't cause a problem though
-		// possibly a mounting issue where any property in here would ensure it's updated
-		//const selectedNodeID = useRecoilValue(selectedNodeID_atom);
-		//const [ expanded, expandedΔ ] = useRecoilState(sidebarExpand_atom)
-		/*
-		useEffect(()=>{
-			const handleKey = (e:any)=>{
-				if(pocketID && !selectedNodeID
-					//&& !expanded
-				){
-					switch(e.key){
-						case "Delete":
-						case "Escape":
-							pocketIDΔ(null)
-						break;
-						case "Enter":
-							//textEditableΔ(true)
-						break;
-					}
-				}
-			}
-			window.addEventListener('keyup', handleKey);
-			return ()=>{
-				window.removeEventListener('keyup', handleKey);
-			};
-		},[
-			pocketID,
-			selectedNodeID,
-			//expanded,
-		]);
-		*/
-
 		return(<>
 			{
 				__x

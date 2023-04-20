@@ -1,6 +1,6 @@
 import { __x, __o } from '../tools/defaults';
 
-import { view_atom, } from "./RecoilComponent";
+import { NEO_canvasID_atom, NEO_note_atom, NEO_pocketID_atom, selectedID_atom, view_atom, } from "./RecoilComponent";
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
 
 import { useEffect, useState } from 'react';
@@ -28,6 +28,31 @@ export default function Report(){
 		}})
 	},[]);
 	
+	
+	// master navigation shortcuts
+	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom);
+	const [ pocketID, pocketIDΔ ] = useRecoilState(NEO_pocketID_atom);
+	const selectedGlobalID = useRecoilValue(selectedID_atom)
+	useEffect(()=>{
+		const handleKey = (e:any)=>{
+			if(pocketID && !selectedGlobalID){
+				if(e.key == "End"){
+					const swapID = canvasID
+					canvasIDΔ(pocketID)
+					pocketIDΔ(swapID)
+				}
+				else if(e.key == "Escape" || e.key == "Delete"){
+					pocketIDΔ("")
+				}
+			}
+		};			window.addEventListener(	'keyup', handleKey);
+		return ()=>{window.removeEventListener('keyup', handleKey);};
+	},[
+		pocketID,
+		canvasID,
+		selectedGlobalID,
+	])
+
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -124,3 +149,20 @@ export default function Report(){
 		}</>
 	)
 }
+
+/*
+{
+	__o
+	&&(
+		<div style={{position:`absolute`, top:`50%`, left:`50%`, translate:`-50% -50%`, outline:`1px solid black`, zIndex:40000, maxWidth:`300px`, color:`white`, textAlign:`left`, backgroundColor:`hsla(0, 0%, 20%, 1.0)`}}>
+			<pre style={{
+				overflowY:`auto`,
+				overflowX:`hidden`,
+			}}>
+				{JSON.stringify(window.matchMedia("(pointer: fine)").matches, null, '\r')}
+			</pre>
+		</div>
+	)
+	{JSON.stringify(view.system, null, '\r')}
+}
+*/
