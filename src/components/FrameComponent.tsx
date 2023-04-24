@@ -29,7 +29,6 @@ export default function Frame(){
 			outline:`2px solid ${recolor(canvasNote.color, {lum:-30})}`,
 			backgroundColor:recolor(canvasNote.color, {lum:-10}),
 		}:{},
-		display:`flex`, alignItems:`center`, justifyContent:`center`,
 		position:`absolute`,
 		left:`0px`, right:`0px`,
 		height:`60px`,
@@ -64,8 +63,8 @@ export default function Frame(){
 					...baseStyle,
 					top:`0px`,
 					fontSize:`150%`,
-					display:`flex`,
 				}}
+				className='centerflex'
 			/>
 		</>)
 	}
@@ -93,6 +92,7 @@ export default function Frame(){
 					...baseStyle,
 					bottom:`0px`,
 				}}
+				className='centerflex'
 			/>
 		</>)
 	}

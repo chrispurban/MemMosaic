@@ -49,8 +49,8 @@ export default function Login(){
 	
 	return(
 		<div
+			className='centerflex'
 			style={{
-				display:`flex`,
 				flexDirection:`column`,
 			}}
 		>

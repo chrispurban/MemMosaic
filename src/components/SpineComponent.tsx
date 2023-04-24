@@ -49,16 +49,17 @@ export default function Spine(props:any){
 
 function Delay({content}:any){
 	return(<>
-		<div style={{						display:`flex`,
-
-			overflow:`hidden`,			justifyContent:`center`,		
-			pointerEvents:`none`,		alignItems:`center`,				
-			userSelect:`none`,			textAlign:`center`,				
-
-			width:`${100}%`,
-			height:`${100}%`,
-
-		}}>
+		<div
+			className='centerflex'
+			style={{
+				textAlign:`center`,
+				overflow:`hidden`,
+				pointerEvents:`none`,
+				userSelect:`none`,
+				width:`${100}%`,
+				height:`${100}%`,
+			}}
+		>
 			<h1 style={{
 				transform:`translate(${0}%, ${-50}%)`,
 			}}>

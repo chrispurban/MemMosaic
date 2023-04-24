@@ -35,7 +35,6 @@ export default function Sidebar(){
 
 	//const currentID = useRecoilValue(NEO_user_selector).current
 	//const originID = useRecoilValue(NEO_user_selector).origin
-
 	
 	const seekOrigin = useCallback(() => {
 		if(canvasID == user.origin){ // you're on the origin
@@ -97,37 +96,42 @@ export default function Sidebar(){
 				&& <div
 					ref={componentRef}
 					style={{
-						position:'absolute',
-
-						//...(expanded?{width:'260px',}:{}),
-
-						right:!left?`${expanded?0:10}px`:undefined,
-						left:left?`${expanded?0:10}px`:undefined,
-
-
-						top:`${expanded?0:10}px`,
-						...(expanded?{width:'260px', height:`100%`, }:{}),
-						zIndex:'1000',
-						padding:`${expanded?10:0}px`,
 						display:`flex`,
+						position:'absolute',
 						flexDirection:`column`,
 						gap:`12px`,
-						backgroundColor:recolor(note.color, {lum:(-30)}),
+						zIndex:'1000',
 						outline:`2px solid ${recolor(note.color, {lum:(-40)})}`,
+						background:				recolor(note.color, {lum:(-30)}),
+						...(left
+							?{
+								left:`${expanded?0:10}px`,
+								marginRight:`auto`,
+							}
+							:{
+								right:`${expanded?0:10}px`,
+								marginLeft:`auto`,
+							}
+						),
+						...(expanded
+							?{top:`0px`, width:'260px', height:`100%`, padding:`10px`,}
+							:{top:`10px`,}
+						),
 					}}
 				>
 					<button
+						className='centerflex'
 						style={{
-							marginLeft:left?undefined:`auto`,
-							marginRight:!left?undefined:`auto`,
 							width:'40px', height:'40px',
-							display: `flex`,
-							alignItems:`center`, justifyContent:`center`,
 							textAlign:`center`,
 							border:`0px`,
-							background:recolor(note.color, {hue:0, lum:(-20), sat:0}),
-							outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40)})}`,
 							userSelect:`none`,
+							outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40)})}`,
+							background:				recolor(note.color, {lum:(-20)}),
+							...(left
+								?{marginRight:`auto`}
+								:{marginLeft:`auto`}
+							),
 						}}
 						onClick={(e)=>{
 							if(left){ // temporary behavior; once history is added, this will become the first option within it
@@ -139,11 +143,15 @@ export default function Sidebar(){
 							e.stopPropagation()
 						}}
 					>
-						<span style={{
-							paddingTop:`${isWindows?0:2}px`,
-							paddingBottom:`${isWindows?3:0}px`,
-							fontSize:`175%`,
-						}}>
+						<span
+							style={{
+								...(isWindows
+									?{paddingBottom:`3px`,}
+									:{paddingTop:`2px`,}
+								),
+								fontSize:`175%`,
+							}}
+						>
 							{left?"🧿":"👤"}
 						</span>
 					</button>
@@ -182,12 +190,14 @@ export default function Sidebar(){
 				</div>
 				{
 					__o
-					&& <pre style={{
-					overflowY:`auto`,
-					overflowX:`hidden`,
-					}}>
-						{JSON.stringify(selectors, null, '\r')}
-					</pre>
+					&&(
+						<pre style={{
+							overflowY:`auto`,
+							overflowX:`hidden`,
+						}}>
+							{JSON.stringify(selectors, null, '\r')}
+						</pre>
+					)
 				}
 			</>
 		}/>
