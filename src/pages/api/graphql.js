@@ -10,9 +10,9 @@ const typeDefs = gql`
 		UUIDs: UUIDs! @cypher(statement: """ RETURN {linkID: randomUUID(), noteID: randomUUID()} as output """)
 
 		Note(noteID: String, userID: String): Note @cypher(statement: """
-      	MATCH (u:User{uuid:$userID})-[:Owns]->(n:Note{uuid:$noteID})
-      	RETURN n
-    	""")
+      			MATCH (u:User{uuid:$userID})-[:Owns]->(n:Note{uuid:$noteID})
+      			RETURN n
+    		""")
 
 		User(email: String): User @cypher(statement: """
 			OPTIONAL MATCH (u:User {email: $email})
