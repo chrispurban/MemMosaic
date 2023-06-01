@@ -3,44 +3,17 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-co
 import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 
-// need to make sure we're getting things which are owned by the user
-
-/*
-		User(email: String): User @cypher(statement: """
-			MATCH (u{email:$email})
-			RETURN u
-		""")
-*/
-
-/*
-		destination: Note @cypher(statement: """
-			MATCH (source)-[this]-(d)
-			RETURN d
-		""")
-
-		destination: Note @cypher(statement: """
-			MATCH (source)-[this]->(d:Note)
-			RETURN d
-			UNION
-			MATCH (d:Note)-[this]->(source)
-			RETURN d
-		""")
-
-
-			type Note @exclude(operations:[DELETE]) {
-*/
-
-// links did not behave when the query did not care about direction
-// possibly two problems with this at both the level of links query and destination query
-// queryside union produced nothing
-
 const typeDefs = gql`
 
 	type Query {
+
+		UUIDs: UUIDs! @cypher(statement: """ RETURN {linkID: randomUUID(), noteID: randomUUID()} as output """)
+
 		Note(noteID: String, userID: String): Note @cypher(statement: """
       	MATCH (u:User{uuid:$userID})-[:Owns]->(n:Note{uuid:$noteID})
       	RETURN n
     	""")
+
 		User(email: String): User @cypher(statement: """
 			OPTIONAL MATCH (u:User {email: $email})
 			WITH u
@@ -51,14 +24,15 @@ const typeDefs = gql`
 			WHERE $email IS NULL
 			RETURN d AS User
 		""")
-		UUIDs: UUIDs! @cypher(statement: """
-			RETURN {linkID: randomUUID(), noteID: randomUUID()} as output
-		""")
+
 	}
+
+
 	type UUIDs {
 		linkID: String
 		noteID: String
 	}
+	
 
 	type Note {
 		uuid: String
@@ -74,6 +48,8 @@ const typeDefs = gql`
 			RETURN l
 		""")
 	}
+
+
 	type LinkOutbound implements Link {
 		uuid: String
 		position: Position
@@ -84,6 +60,8 @@ const typeDefs = gql`
 			RETURN d
 		""")
 	}
+
+
 	type LinkInbound implements Link {
 		uuid: String
 		position: Position
@@ -94,6 +72,8 @@ const typeDefs = gql`
 			RETURN d
 		""")
 	}
+
+
 	interface Link {
 		uuid: String
 		position: Position
@@ -102,14 +82,19 @@ const typeDefs = gql`
 		destination: Note
 	}
 
+
 	type Position {
 		x: Float!
 		y: Float!
 	}
+
+
 	type Length {
 		x: Float!
 		y: Float!
 	}
+
+
 	type User {
 		uuid: String
 		origin: String
@@ -118,7 +103,9 @@ const typeDefs = gql`
 		isAdmin: Boolean
 	}
 
+
 	type Mutation {
+
 		createUser(email: String!): User @cypher(statement: """
 			CREATE (
 				n:Note{
@@ -167,16 +154,6 @@ const typeDefs = gql`
 			}]->(t)
 		""")
 
-		editNote(uuid: String, data: NoteInput!, userID: String): ReNote @cypher(statement:"""
-			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid: $uuid})
-			SET n += {
-				color: coalesce($data.color, n.color),
-				icon: coalesce($data.icon, n.icon),
-				text: coalesce($data.text, n.text)
-			}
-			RETURN n
-		""")
-
 		createNote(note:NoteInput!, link:LinkInput!, user:String, canvasID:String): ReNote @cypher(statement:"""
 			MATCH (u:User{email:user})-[:Owns]->(c:Note{uuid:canvasID})
 			CREATE (u)-[:Owns]->(n:Note{
@@ -199,17 +176,20 @@ const typeDefs = gql`
 			RETURN n
 		""")
 
+		editNote(uuid: String, data: NoteInput!, userID: String): ReNote @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid: $uuid})
+			SET n += {
+				color: coalesce($data.color, n.color),
+				icon: coalesce($data.icon, n.icon),
+				text: coalesce($data.text, n.text)
+			}
+			RETURN n
+		""")
+
 		deleteNote(noteID:String, userID:String): Note @cypher(statement:"""
 			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
 			DETACH DELETE n
 		""")
-
-
-		setCurrent( userID:String, noteID:String ): Boolean @cypher(statement:"""
-			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
-			SET u.current = n.uuid
-		""")
-
 
 		deleteLink(linkID: String, noteID: String, userID: String): Boolean @cypher(statement: """
 			MATCH (u:User {email: $userID})-[:Owns]->(n:Note{uuid: $noteID})-[l:Link {uuid: $linkID}]-()
@@ -219,7 +199,13 @@ const typeDefs = gql`
 			DETACH DELETE n
 			RETURN stillConnected
 		""")
+
+		setCurrent( userID:String, noteID:String ): Boolean @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
+			SET u.current = n.uuid
+		""")
 	}
+
 
 	type ReNote {
 		uuid: String
@@ -227,6 +213,8 @@ const typeDefs = gql`
 		icon: String
 		text: String
 	}
+
+
 	input NoteInput {
 		uuid: String
 		color: String
@@ -234,22 +222,29 @@ const typeDefs = gql`
 		text: String
 	}
 
+
 	type ReLink {
 		uuid: String
 		position: Position
 		length: Length
 		canTravel: Boolean
 	}
+
+
 	input LinkInput {
 		uuid: String
 		position: RePosition
 		length: ReLength
 		canTravel: Boolean
 	}
+
+
 	input RePosition {
 		x: Float!
 		y: Float!
 	}
+
+
 	input ReLength {
 		x: Float!
 		y: Float!
@@ -303,3 +298,24 @@ export const config = {
 		bodyParser: false
 	}
 }
+
+
+/*
+		destination: Note @cypher(statement: """
+			MATCH (source)-[this]-(d)
+			RETURN d
+		""")
+
+		destination: Note @cypher(statement: """
+			MATCH (source)-[this]->(d:Note)
+			RETURN d
+			UNION
+			MATCH (d:Note)-[this]->(source)
+			RETURN d
+		""")
+
+		type Note @exclude(operations:[DELETE])
+*/
+// links did not behave when the query did not care about direction
+// possibly two problems with this at both the level of links query and destination query
+// queryside union produced nothing
