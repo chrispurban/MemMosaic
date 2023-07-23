@@ -23,42 +23,32 @@ export const client = new ApolloClient({
 	cache: new InMemoryCache(),
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// general user interface
+export const view_atom = atom({
+	key:"view_atom",
+	default:{
+		grid:10,
+		unit:40,
+		frame:60,
+		height:{
+			absolute:0,
+			divided:0,
+			remainder:0,
+		},
+		// system:{} // excluded because of a check on Spine for it
+	},
+});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-// handled directly with getSession right now
-export const NEO_session_atom = atom({
-	key:"NEO_session_atom",
-	default:undefined,
-	effects:[
-		({onSet})=>{ onSet( (changedValues)=>{ // getSession hook value passed by Spine component
-			let email = changedValues?.data?.user?.email
-			if(email){
-				console.warn(`Signed in as ${
-					email.split('@')[0]
-				} for ${
-					Math.ceil((Date.parse(changedValues.data.expires) - Date.now())/(1000 * 3600 * 24))
-				} more days`)
-			}
-			else{
-				console.warn(`Register to make changes`)
-			}
-		} ); }
-	],
-})
-*/
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const NEO_user_selector = selector({
+// load user account
+export const NEO_user_selector = selector({ // associate username with saved content
 	key: "NEO_user_selector",
 	get: async ({get})=>{
 		const userSession = await getSession()
-		const email = userSession?.user?.email
-		//console.log("user session obtained", userSession)
-		
-		let user
+		const email = userSession?.user?.email //console.log("user session obtained", userSession)
 		const readResponse = await client.query({ // see if they have a user account yet
 			query: gql`
 			query($email:String){
@@ -73,7 +63,10 @@ export const NEO_user_selector = selector({
 			variables:{ email } // GraphQL typeDef is set to return the default user if email is blank
 		});
 		if(readResponse.error){throw readResponse.error;}
-		if(readResponse?.data?.User){ // has an account or is using the default
+
+		let user
+
+		if(readResponse?.data?.User){ // they do have an account, or are signed out and using the default
 			user = readResponse
 		}
 		else{
@@ -94,18 +87,20 @@ export const NEO_user_selector = selector({
 			if(createResponse.error){throw createResponse.error;}
 			user = createResponse
 		}
+
 		return user.data.User
 	}
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// track which note you're viewing the internal world of
 export const NEO_canvasID_atom = atom({
 	key: 'NEO_canvasID_atom',
 	default: selector({
 		key: 'UserInfo/Default',
 		get: ({get}) => {
-			const user = get(NEO_user_selector)
+			const user = get(NEO_user_selector) // load the last canvas you were looking at
 			if(user.current){
 				return user.current
 				// to even try and delete the current would require a severe delay in updating this property, as there's no mechanism for deleting the one you're looking at
@@ -133,29 +128,27 @@ export const NEO_canvasID_atom = atom({
 	]
 });
 
-// if you come in via hyperlink it should query with that note
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// track whether a note is currently being edited; 
 export const selectedID_atom = atom({
 	key: 'selectedID_atom',
 	default: "",
 });
-// purpose to allow you to track whether a note is currently being edited; 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// uses the currently selected canvas note and sets up state for all its related notes
-// this process repeats every time the user navigates, but only the first time for each note
-// there are three redundant checks to prevent an infinite loop: the GET, the SET, and the bottom of this component
+// use the currently selected canvas and load the first ring of related notes
+// this process repeats the first time you navigate to each note, to get the next ring
+// there are three redundant checks to prevent an infinite loop: the GET, the SET, and the const NEO_hydra within the Recoil component
 export const NEO_hydra_selector = selector({
 	key:'NEO_hydra_selector',
 	get: async ({ get }) => {
 
-		const canvasID = get(NEO_canvasID_atom)
-		const canvas = get(NEO_note_atom(canvasID))
+		const canvasID = get(NEO_canvasID_atom) // your current canvas
+		const canvas = get(NEO_note_atom(canvasID)) // its content
 
-		if(!canvas.queried){
+		if(!canvas.queried){ // loop check
 			const userID = get(NEO_user_selector).uuid
 			const response = await client.query({
 				query: gql`
@@ -200,41 +193,44 @@ export const NEO_hydra_selector = selector({
 			return null;
 		}
 	},
-	// SET is not allowed to be asynchronous but can apparently still rely on an asynchronous selector so long as that selector has been initialized at least once; otherwise there's an error about pending state
-	// acquired data is simply what came from GET but routed through the component, as Recoil requires all SETs to begin in this fashion
-	set:({set, get}, strip)=>{ const acquired = strip.data.Note
-		if(acquired){
-			const 			canvas =					get(NEO_note_atom(acquired.uuid))
-			if(			  !canvas.queried){		set(NEO_note_atom(acquired.uuid),{ // look into eliminating the blink on the first travel of a link
+	// data manipulated here within SET is simply what came from GET but has been routed through the component, as Recoil requires all SETs to begin in this fashion
+	// Recoil SET is not allowed to be asynchronous but can apparently still rely on an asynchronous selector so long as that selector has been initialized at least once
+	// otherwise there's an error about pending state
+	set:({set, get}, strip)=>{
+		const acquiredNote = strip.data.Note
+		if(acquiredNote){
+			const 			canvas =					get(NEO_note_atom(acquiredNote.uuid))
+			if(			  !canvas.queried){		set(NEO_note_atom(acquiredNote.uuid),{ // loop check
 				queried:		true,
-				uuid:			canvas.uuid				||						acquired.uuid,
-				color:		canvas.color			||						acquired.color,
-				text:			canvas.text				||						acquired.text,
-				icon:			canvas.icon				||						acquired.icon,
+				uuid:			canvas.uuid				||						acquiredNote.uuid, // copy everything* into canvas state
+				color:		canvas.color			||						acquiredNote.color,
+				text:			canvas.text				||						acquiredNote.text,
+				icon:			canvas.icon				||						acquiredNote.icon,
 				links:[	
-					...new Set([ // remove duplicate client links if the network was fast enough
-						...	canvas.links,
+					...new Set([ // object type removes duplicate client links if the network was too fast
+						...canvas.links, // any newly created links in client state which may not have fully saved yet, but also don't need to be loaded further
 						...[
-							...acquired.linksOut,
-							...acquired.linksIn
-						].map((xQL)=>{
-							set(NEO_link_atom(		xQL.uuid),(priorLink)=>{return{
-								...priorLink,		...xQL,
-								position:{			...xQL.position,		__typename:undefined}, //position:({__typename, ...rest} = xQL.position, rest),
-								length:{				...xQL.length,			__typename:undefined},
-								notes:[
-															xQL.destination.uuid,
-															acquired.uuid,
-								],
-								destination:			undefined,
-								__typename:				undefined,
-							}})	
-							set(NEO_note_atom(		xQL.destination.uuid),(priorNote)=>{return{
-								...priorNote,		...xQL.destination,
-								__typename:				undefined,
-							}})
-							return xQL.uuid
-						})
+							...acquiredNote.linksOut, // preexisting links, OUT + IN until you can get it to properly ignore directionality
+							...acquiredNote.linksIn
+						]
+							.map((queriedLink)=>{
+								set(NEO_link_atom(		queriedLink.uuid),(priorLink)=>{return{ // instantiating the connection between notes
+									...priorLink,		...queriedLink,
+									position:{			...queriedLink.position,		__typename:undefined}, //position:({__typename, ...rest} = queriedLink.position, rest),
+									length:{				...queriedLink.length,			__typename:undefined},
+									notes:[
+																queriedLink.destination.uuid,
+																acquiredNote.uuid, // aka point of origin
+									],
+									destination:			undefined,
+									__typename:				undefined,
+								}})	
+								set(NEO_note_atom(		queriedLink.destination.uuid),(priorNote)=>{return{ // instantiating only surface-level information about the note
+									...priorNote,		...queriedLink.destination,
+									__typename:				undefined,
+								}})
+								return queriedLink.uuid
+							})
 					])		
 				]
 			})}
@@ -244,6 +240,7 @@ export const NEO_hydra_selector = selector({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// core note state, empty until populated by the hydra
 export const NEO_note_atom = atomFamily({
 	key: 'NEO_note_atom',
 	default: uuid => {
@@ -263,6 +260,7 @@ export const NEO_note_atom = atomFamily({
 	],
 })
 
+// core link state, empty until populated by the hydra
 export const NEO_link_atom = atomFamily({
 	key: 'NEO_link_atom',
 	default: uuid => {
@@ -287,16 +285,20 @@ export const NEO_link_atom = atomFamily({
 	]
 });
 
-export const NEO_UUID_atom = atom({
-	key: 'NEO_UUID_atom',
-	default:null,
- });
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const NEO_UUID_selector = selector({
-	key: 'NEO_UUID_selector',
+// reservoir for the last set of newly created UUIDs, not fully to your liking; done because of asynchronous rules
+export const NEO_UUID_spent_atom = atom({
+	key: 'NEO_UUID_spent_atom',
+	default:null,
+});
+
+// obtain new UUIDs every time one is spent on note creation, marked by presence in the reservoir
+export const NEO_UUID_generation_selector = selector({
+	key: 'NEO_UUID_generation_selector',
 	get: async ({get})=>{
-		const anchor = get(NEO_UUID_atom)
-		let UUIDs = await client
+		const anchor = get(NEO_UUID_spent_atom)
+		let newUUIDs = await client
 			.query({
 				query: gql`
 					query {
@@ -309,25 +311,19 @@ export const NEO_UUID_selector = selector({
 				fetchPolicy: "no-cache",
 			})
 			.then(({data})=>(data.UUIDs));
-		return UUIDs
+		return newUUIDs
 	},
 	set:({set}, oldUUIDs)=>{
 		//console.log("you triggered the UUID selector")
-		set(NEO_UUID_atom,oldUUIDs) // triggers regeneration of UUIDs after 
+		set(NEO_UUID_spent_atom,oldUUIDs) // triggers regeneration of UUIDs after 
 	}
 })
 
-// get a big list and delete entries as they're used?
-
-/////////////////////////
-/////////////////////////
-
-export const NEO_create_selector = selector({
-	key: 'NEO_create_selector',
-	get: () => undefined,
+	// get a bigger list and delete entries as they're used?
+	// still wouldn't qualitatively fix the problem
 	/*
 	get: async ({get})=>{
-		const anchor = get(NEO_UUID_atom)
+		const anchor = get(NEO_UUID_spent_atom)
 		let UUIDs = await client
 			.query({
 				query: gql`
@@ -347,21 +343,27 @@ export const NEO_create_selector = selector({
 	*/
 	// get could handle UUID generation if initiated ahead of time
 
+
+// creation of a note, and by extension a link
+export const NEO_create_selector = selector({
+	key: 'NEO_create_selector',
+	get: () => undefined,
 	set:({get, set}, {
 		position, isLink, reLink,
 		//linkID, noteID,
 	})=>{
-		let canvasID = get(NEO_canvasID_atom)
-		let canvas = get(NEO_note_atom(canvasID))
-		let user = get(NEO_user_selector)
+		let canvasID = get(NEO_canvasID_atom) // location to begin the link
+		let canvas = get(NEO_note_atom(canvasID)) // only used to pull color information, how/whether to deviate
+		let user = get(NEO_user_selector) // authentication
 
-		const UU = get(NEO_UUID_selector)
+		const UU = get(NEO_UUID_generation_selector) // uuid generator
 
-		set(selectedID_atom, UU) // otherwise functions won't know you're editing something like they normally would from click handlers
+		set(selectedID_atom, UU) // otherwise global functions won't know you're editing something like they normally would from click handlers
 
+		// prepare destination
 		set(NEO_note_atom(UU.noteID),(priorValues)=>{return{
 			...priorValues,
-			color:recolor(canvas.color, { // deviates from canvas if it's a link
+			color:recolor(canvas.color, { // shift color away from canvas if it's a link
 				hue:isLink?-(Math.floor(Math.random()*(canvas.uuid == user.origin?360:91)) + 30):0, // would be more appropriate to look at whether the saturation was zero
 				sat:isLink?`${Math.floor(Math.random() * 11) + 30}`:0,
 				lum:isLink?`${Math.floor(Math.random() * 11) + 80}`:0, // should cap at 90, is presented 5 higher
@@ -369,30 +371,33 @@ export const NEO_create_selector = selector({
 			icon: isLink?emoji():null,
 			text: "", // causes the note to enable editing on itself, and then delete itself if saved while still blank
 			links:[
-				UU.linkID
+				UU.linkID // new UUID is used but not marked as spent until the end
 			],
 		}})
+		// we're setting this in state first because it will be written to the database only when completed; they may back out
 
+		// pull a new link out of the new note
 		set(NEO_link_atom(UU.linkID),(priorValues)=>{return{
 			...priorValues,
 			position,
 			length:isLink?{x:3,y:1}:{x:6,y:1},
 			canTravel:isLink,
 			notes:[
-				canvasID,
-				UU.noteID
+				canvasID, // point of origin
+				UU.noteID // new destination
 			]
 		}})
 
+		// attach link to the current canvas
 		set(NEO_note_atom(canvasID),(prevData)=>({
 			...prevData,
-			links: [
+			links:[
 				...prevData.links,
 				UU.linkID
 			]
 		}) );
 		
-		set(NEO_UUID_selector, UU) // triggers regeneration of UUIDs after spending them
+		set(NEO_UUID_generation_selector, UU) // triggers regeneration of UUIDs after spending them
 	}
 });
 
@@ -401,7 +406,7 @@ export const NEO_create_selector = selector({
 //////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-// duplicate for the purpose of working out how to copy links out of the pocket
+// deliberate code duplicate for the purpose of working out how to properly copy links out of the pocket
 
 export const NEO_create2_selector = selector({
 	key: 'NEO_create2_selector',
@@ -456,10 +461,10 @@ export const NEO_create2_selector = selector({
 //////////////////////////////////////////////////////////////////
 /////////////////////////////////
 
+
 export const NEO_pocketID_atom = atom({
 	key:"NEO_pocketID_atom",
 	default:"",
-	//default:localStorage("pocket")||null,
 	effects:[
 		({onSet})=>{ onSet( (changedValues)=>{
 			if(changedValues){console.warn(`POCKET link set to node ${changedValues}`)}
@@ -467,45 +472,61 @@ export const NEO_pocketID_atom = atom({
 	],
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const view_atom = atom({
-	key:"view_atom",
-	default:{
-		grid:10,
-		unit:40,
-		frame:60,
-		height:{
-			absolute:0,
-			divided:0,
-			remainder:0,
-		},
-		// system:{} // excluded because of a check on Spine for it
-	},
-});
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 
-// only place here either:
-// - anchors which kickstart a selector
-// - effects which pass a selector's GET data to trigger another's SET
+export default function RecoilComponent(){ //console.log("Recoil component rendered")
 
-export default function RecoilComponent(){
-	//console.log("recoil component rendered")
+	// a component was used (instead of a side JS file) for self-setting and access to React hooks for things like authorization
 
-	const [ NEO_hydra , NEO_hydraΔ ] = useRecoilState(NEO_hydra_selector)
-	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
-	const [ canvas, canvasΔ ] = useRecoilState(NEO_note_atom(canvasID))
-	useEffect(()=> { // pass async GET to SET; other options internal to Recoil not available
-		if(!canvas.queried){NEO_hydraΔ(NEO_hydra)}
+	// passing async GET directly to SET; other options internal to Recoil were not available
+	const [ NEO_hydra, NEO_hydraΔ ] = useRecoilState(NEO_hydra_selector)
+	const canvas = useRecoilValue(NEO_note_atom(useRecoilValue(NEO_canvasID_atom)))
+	useEffect(()=> {
+		if(!canvas.queried){NEO_hydraΔ(NEO_hydra)} // loop check
 	},[
 		canvas, NEO_hydra
 	])
 
-	const anchorUUID = useRecoilValue(NEO_UUID_selector)
+	// anchor needed to kickstart a selector; placed here to avoid creating a dependency with rerenders elsewhere
+	const anchors = [
+		useRecoilValue(NEO_UUID_generation_selector)
+	]
 
 	return null
 }
+
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+// handled directly with getSession right now
+export const NEO_session_atom = atom({
+	key:"NEO_session_atom",
+	default:undefined,
+	effects:[
+		({onSet})=>{ onSet( (changedValues)=>{ // getSession hook value passed by Spine component
+			let email = changedValues?.data?.user?.email
+			if(email){
+				console.warn(`Signed in as ${
+					email.split('@')[0]
+				} for ${
+					Math.ceil((Date.parse(changedValues.data.expires) - Date.now())/(1000 * 3600 * 24))
+				} more days`)
+			}
+			else{
+				console.warn(`Register to make changes`)
+			}
+		} ); }
+	],
+})
+*/
+/////////////////////////////////////////////////////////////////////////////////////////////////////
