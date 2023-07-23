@@ -49,11 +49,6 @@ export default function Note({passedLink}:any){
 	const refComponent = useRef<HTMLDivElement>(null);
 	const refDraggable = useRef<HTMLDivElement>(null);  
 
-	const styleFlex = {
-		display:`flex`,
-		alignItems:`center`,
-		justifyContent:`center`,
-	}
 	const borderMargin = view.unit / 4
 
 	// BASIC INTERFACE ^^^
@@ -231,7 +226,7 @@ export default function Note({passedLink}:any){
 
 	const [ selected, selectedΔ ] = useState(false)
 
-
+	
 	const [ dragEnabled, dragEnabledΔ ] = useState(true)
 	const [ dragActive, dragActiveΔ ] = useState(false)
 	useEffect(()=>{if(!dragEnabled){dragActiveΔ(false)}},[dragEnabled]);
@@ -271,15 +266,17 @@ export default function Note({passedLink}:any){
 	]);
 	
 
-	const [ spaceInput, spaceInputΔ ] = useState({length:link.length});
+	const [ spaceInput, spaceInputΔ ] = useState({length:link.length, offset:0});
 	useEffect(()=>{
 		const textArea = refText.current;
 		if(textArea && !link.canTravel){
 			textArea.style.height = "0px"; // make it shrink again when deleting content
 			textArea.style.height = `${textArea.scrollHeight}px`;
-			const newLengthY = Math.ceil( ((textArea.scrollHeight+4)/view.unit) *2)/2 // + is to account for the margin, however much of that you want
+			const newLengthY = Math.max( 1, Math.ceil( ((textArea.scrollHeight+4)/view.unit) *2)/2 )// + is to account for the margin, however much of that you want
 
-			spaceInputΔ((v)=>{return{...v, length:{...v.length, y:Math.max(1, newLengthY), }}})
+			spaceInputΔ((v)=>{return{...v, length:{...v.length, y:newLengthY},
+				//offset:(newLengthY-link.length.y)/2
+			}})
 			// remember this occurs only when an edit is made, not when trim() runs
 			// in order for linkΔ to save the trimmed height you'd have to wait on trimming the text, then run the ref check again
 		}
@@ -292,6 +289,10 @@ export default function Note({passedLink}:any){
 	// MAIN EFFECTS FOR EDITING TEXT AND REPOSITIONING vvv
 
 	const [ isHidden, isHiddenΔ ] = useState(false) // used during deletion
+
+	function noteSave(){
+		console.log("hello")
+	}
 	
 	useEffect(()=>{
 		const handleKey = (e:any)=>{
@@ -390,35 +391,42 @@ export default function Note({passedLink}:any){
 
 	useEffect(()=>{
 		const handleClick = (e:any)=>{
-			if(refComponent.current && !refComponent.current.contains(e.target)){ // clicked outside component
-				// if(menuPop == linkMaster.id){menuPopΔ(null)} // mobile control
-				if(textIsEditable && !protectedClickOut){ // not simply highlighting from inside the textbox
-					const newText = textInputValue.trim()
-					if(0==newText.length){ // was left blank
-						if(
-							__o
-							|| (link.canTravel && 0==note.text.length) // started as a blank canvas
-							|| !link.canTravel // isn't a canvas at all
-						){
-							isHiddenΔ(true)
-							linkΔΔ(link.uuid, null)
-						} // blank counts as final, get rid of it
-						else{
-							textInputValueΔ(note.text)
-						} // revert back, do nothing
-					}
-					else if(textIsChanged){
-						noteΔ( (n:any)=>{return{...n, text:newText}} )
-						linkΔ( (l:any)=>{return{...l,length:spaceInput.length}} )
+			if(refComponent.current){
+				if(!refComponent.current.contains(e.target)){ // clicked outside component
+					// if(menuPop == linkMaster.id){menuPopΔ(null)} // mobile control
+					if(textIsEditable && !protectedClickOut){ // not simply highlighting from inside the textbox
+						const newText = textInputValue.trim()
+						if(0==newText.length){ // was left blank
+							if(
+								__o
+								|| (link.canTravel && 0==note.text.length) // started as a blank canvas
+								|| !link.canTravel // isn't a canvas at all
+							){
+								isHiddenΔ(true)
+								linkΔΔ(link.uuid, null)
+							} // blank counts as final, get rid of it
+							else{
+								textInputValueΔ(note.text)
+							} // revert back, do nothing
+						}
+						else if(textIsChanged){
+							noteΔ( (n:any)=>{return{...n, text:newText}} )
+							linkΔ( (l:any)=>{return{...l,length:spaceInput.length, 
+							//	position:{x:l.position.x, y:l.position.y+spaceInput.offset}
+							}} )
 
-						noteΔΔ( note.uuid, {text:newText} ) // if a new note, doesn't exist on the database until here
-						linkΔΔ( link.uuid, {length:spaceInput.length} )
+							noteΔΔ( note.uuid, {text:newText} ) // if a new note, doesn't exist on the database until here
+							linkΔΔ( link.uuid, {length:spaceInput.length, } )
+						}
+						textIsEditableΔ(false);
+						selectedΔ(false);
+						if(![...e.target.offsetParent.classList].includes("note")){
+							selectedGlobalIDΔ("");
+						}
 					}
-					textIsEditableΔ(false);
-					selectedΔ(false);
-					if(![...e.target.offsetParent.classList].includes("note")){
-						selectedGlobalIDΔ("");
-					}
+				}
+				else{
+					console.log("clicked inside", note)
 				}
 			}
 		};
@@ -472,7 +480,7 @@ export default function Note({passedLink}:any){
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DIRECT DRAG HANDLERS vvv
 
-	function onStart(event:any, data:any){ //console.log(`${proxyNode.id} start detected`)
+	function onStart(event:any, data:any){ console.log(`start detected`,note.uuid)
 		if(
 			__x
 	//		&& selectionID!==proxyNode.id // not coming from a duplicate
@@ -482,7 +490,7 @@ export default function Note({passedLink}:any){
 			selectedΔ(true)
 			selectedGlobalIDΔ(link.uuid) // for letting other components know
 		}
-		if(refText.current && refText.current.contains(event.target)){ // don't drag if clicking textbox
+		if(refText.current && refText.current.contains(event.target)){ // don't drag if clicking textbox while editing
 			return(false)
 		}
 	}
@@ -507,7 +515,7 @@ export default function Note({passedLink}:any){
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	function onStop(event:any ,data:any){ //console.log(`${proxyNode.id} stop detected`)
+	function onStop(event:any ,data:any){ console.log(`stop detected`,note.uuid)
 		if(dragActive){
 			dragActiveΔ(false)
 			if(selected && !textIsEditable){selectedΔ(false), selectedGlobalIDΔ("")} // deselect if not still editing // make an effect?
@@ -571,6 +579,14 @@ export default function Note({passedLink}:any){
 	// FINAL RENDER vvv
 
 	const debugVariables = { // name and values will float next to the note
+		/*
+		*/
+		textIsEditable,
+		textIsChanged,
+		dragEnabled,
+		dragActive,
+		selected,
+		protectedClickOut,
 	}
 
 	return(<>
@@ -583,8 +599,8 @@ export default function Note({passedLink}:any){
 				<div
 					// area the note can be dragged within
 					ref={refComponent}
-					style={{												overflow:`hidden`,									
-						...styleFlex,									pointerEvents:`none`,
+					style={{
+						overflow:`hidden`,							pointerEvents:`none`,
 						textAlign:`center`,							userSelect:`none`,										
 						
 						left:`${50}%`,		width:`${100}%`,		position:`absolute`,
@@ -593,6 +609,7 @@ export default function Note({passedLink}:any){
 						zIndex:((link.canTravel?3:1) * (1+(selected?1:0))) + ((link.inPocket || link.inHeader)?2:0) + (textIsEditable?8:0),
 						// text goes 1 to 2, link goes 3 to 6, inPocket link 5 to 8
 					}}
+					className='centerflex'
 				>
 					<Draggable
 						onStart={onStart} onDrag={onDrag} onStop={onStop}
@@ -608,46 +625,51 @@ export default function Note({passedLink}:any){
 										: 1
 								),
 						}}
-						positionOffset={
-							((link.inPocket || link.inHeader) && !dragActive)
-								? {
-									x:0,
-									y:(view.height.remainder)*link.position.y,
-								}
-								: undefined
-						}
-					>
+						positionOffset={{
+							x:0,
+							y:(spaceInput.offset * view.unit) + ( ((link.inPocket || link.inHeader) && !dragActive) ?(view.height.remainder)*link.position.y :0 ),
+						}}
+/*
+						{...( ((link.inPocket || link.inHeader) && !dragActive)
+							?{positionOffset:{
+								x:0,
+								y:(view.height.remainder)*link.position.y,
+							}}:{}
+						)}
+*/
+						>
 						<div
 							ref={refDraggable} // used under advisement of Draggable package developer to handle FindDOMNode deprecation
 							style={{pointerEvents:`auto`,}}
 						>
 							<div
-								className="note"
+								className="centerflex note" // if(![...e.target.offsetParent.classList].includes("note")){}
 								style={{
 									position:`absolute`,
 									transform:`translate(-50%,-50%)`,
 									lineHeight:`${link.inHeader?150:100}%`,
 									overflow:`hidden`,
-									...styleFlex, flexDirection:`row`,
+									flexDirection:`row`,
 									...(!link.inHeader
 											?{
 												outline:`${selected?2:1}px solid	 ${recolor(note.color,{lum:(link.canTravel?-5:+5)-20})}`,
 												background:								`${recolor(note.color,{lum:(link.canTravel?-5:+5)- 0})}`,
 											}:{}
 										),
-
 								}}
 							>
 								{
 									__x // bounding box for the icon, if it has one
 									&& note.icon
 									&& (
-										<div style={{
-											...styleFlex,
-											width:`${view.unit*spaceInput.length.y}px`, // to get square shape
-											height:`${view.unit*spaceInput.length.y}px`,
-											fontSize:`${link.inHeader?200:150}%`,
-										}}>
+										<div
+											className='centerflex'
+											style={{
+												width:`${view.unit*spaceInput.length.y}px`, // to get square shape
+												height:`${view.unit*spaceInput.length.y}px`,
+												fontSize:`${link.inHeader?200:150}%`,
+											}}
+										>
 											<span style={{
 												...(view.system.isWin
 													?{ paddingBottom:	`${(link.inHeader?3:3)}px`, }
@@ -663,8 +685,8 @@ export default function Note({passedLink}:any){
 									__x // bounding box for the text
 									&& (
 										<div
+											className='centerflex'
 											style={{
-												...styleFlex,
 												width:`${
 													+ (view.unit * (link.length.x - (note.icon?1:0)) )
 													- (borderMargin / (note.icon?2:1))
@@ -674,11 +696,12 @@ export default function Note({passedLink}:any){
 													-(link.inHeader?0:borderMargin)
 												}px`,
 												margin:`${borderMargin/2}px`,		
-												fontWeight:link.inHeader?`bold`:`normal`,
-												fontSize:`${link.inHeader?140:90}%`,
-
+												...(link.inHeader
+													?{ fontWeight:`bold`, 	fontSize:`140%`}
+													:{ fontWeight:`normal`,	fontSize:`90%`}
+												),
 												...(note.icon?{ marginLeft:'0px', }:{}),
-												...(textIsEditable?{ outline:`2px solid black`, background:`${recolor(note.color,{lum:(link.canTravel?-0:+10)})}`, }:{}),
+												...(textIsEditable?{outline:`2px solid black`, background:`${recolor(note.color,{lum:(link.canTravel?-0:+10)})}`,}:{}),
 											}}
 										>
 											{
@@ -691,9 +714,9 @@ export default function Note({passedLink}:any){
 															style={{
 																pointerEvents:`none`, // important or else the click gets eaten entirely
 																maxWidth:`100%`,
-																paddingBottom:`${view.system.isWin?(2):0}px`,
 																whiteSpace:`pre-wrap`,
 																wordWrap:`break-word`,
+																...(view.system.isWin?{ paddingBottom:'2px', }:{}),
 															}}
 														>
 															{note.text}
@@ -704,9 +727,6 @@ export default function Note({passedLink}:any){
 													__x // editing text
 													&&(
 														<textarea
-															// now that style is controlled, could use textarea only; remaining problem is dealing with sizing on links
-															// readOnly={!textIsEditable}
-															// style={{pointerEvents:(textIsEditable?`all`:`none`)}}
 															ref={refText}
 															value={textInputValue}
 															rows={link.canTravel?2:1}
@@ -721,6 +741,9 @@ export default function Note({passedLink}:any){
 																textInputValueΔ(e.target.value);
 																textIsChangedΔ(true)
 															}}
+															// now that style is controlled, could use textarea only; remaining problem is dealing with sizing on links
+															// readOnly={!textIsEditable}
+															// style={{pointerEvents:(textIsEditable?`all`:`none`)}}
 														/>
 													)
 												)
@@ -728,14 +751,28 @@ export default function Note({passedLink}:any){
 										</div>
 									)
 								}
-
-								<div style={{position:`absolute`, bottom:0<link.position.y?`${view.unit*spaceInput.length.y}px`:undefined, width:`100%`, margin:`5px 0px`, fontSize:`80%`, whiteSpace:'pre-wrap',}}>
-									{Object.keys(debugVariables).map((name)=>{return (<div key={name}>
-										{`${name}: ${String((debugVariables as any)[name])}`}{`\n`}
-									</div>)})}
-								</div>
-								
 							</div>
+							{
+								__o
+								&&(
+									<div style={{
+										position:`absolute`,
+										transform:`translate(-50%,0%)`,
+										whiteSpace:'pre-wrap',
+										margin:`5px 0px`,
+										fontSize:`80%`,
+										width:`${4*view.unit}px`,
+										...(0 < link.position.y
+											?{bottom:`${spaceInput.length.y*view.unit*.5}px`,}
+											:{top:`${spaceInput.length.y*view.unit*.5}px`,}
+										),
+									}}>
+										{Object.keys(debugVariables).map((name)=>{return(<div key={name}>
+											{`${name}: ${String((debugVariables as any)[name])}`}{`\n`}
+										</div>)})}
+									</div>
+								)
+							}
 						</div>
 					</Draggable>
 				</div>
