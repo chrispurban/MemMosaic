@@ -9,12 +9,10 @@ import Frame from "./FrameComponent";
 import Sidebar from "./SidebarComponent";
 import Report from "./ReportComponent";
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 
 export default function Spine(props:any){
 	//console.log("spine component rendered")
-
-	const [ isMobile, isMobileΔ ] = useState(!window.matchMedia("(pointer: fine)").matches)
 
 	return(<>
 		<div style={{
@@ -31,12 +29,8 @@ export default function Spine(props:any){
 				__o
 				||(
 					__x
-					&& isMobile
-					&& <Delay content = "Not ready for mobile... yet!">
-						<button onClick={() => isMobileΔ(false)}>
-							Proceed anyway?
-						</button>
-					</Delay>
+					&& !window.matchMedia("(pointer: fine)").matches
+					&& <Delay content = "Not ready for mobile... yet!"/>
 				)
 				||(
 					<Suspense fallback={
@@ -53,13 +47,15 @@ export default function Spine(props:any){
 	</>)
 }
 
-function Delay({content, children}:any){
+function Delay({content}:any){
 	return(<>
 		<div
 			className='centerflex'
 			style={{
 				textAlign:`center`,
 				overflow:`hidden`,
+				pointerEvents:`none`,
+				userSelect:`none`,
 				width:`${100}%`,
 				height:`${100}%`,
 			}}
@@ -67,17 +63,7 @@ function Delay({content, children}:any){
 			<h1 style={{
 				transform:`translate(${0}%, ${-50}%)`,
 			}}>
-				<div
-					style={{
-						pointerEvents:`none`,
-						userSelect:`none`,
-					}}
-				>
-					{content}
-				</div>
-				<div>
-					{children}
-				</div>
+				{content}
 			</h1>
 		</div>
 	</>)
