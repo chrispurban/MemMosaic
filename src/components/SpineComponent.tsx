@@ -9,10 +9,12 @@ import Frame from "./FrameComponent";
 import Sidebar from "./SidebarComponent";
 import Report from "./ReportComponent";
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 export default function Spine(props:any){
 	//console.log("spine component rendered")
+
+	const [ isMobile, isMobileΔ ] = useState(!window.matchMedia("(pointer: fine)").matches)
 
 	return(<>
 		<div style={{
@@ -26,44 +28,56 @@ export default function Spine(props:any){
 				</Suspense>
 			}
 			{
-				__o
-				||(
-					__x
-					&& !window.matchMedia("(pointer: fine)").matches
-					&& <Delay content = "Not ready for mobile... yet!"/>
-				)
-				||(
-					<Suspense fallback={
-						<Delay content="Loading..."/>
-					}>
-						<Report/>
-						<Canvas/>
-						<Frame/>
-						<Sidebar/>
-					</Suspense>
-				)
+				<Suspense fallback={
+					<Delay content="Loading..."/>
+				}>
+					<Report/>
+					<Canvas/>
+					<Frame/>
+					<Sidebar/>
+				</Suspense>
+			}
+			{
+				__x
+				&& isMobile
+				&& <Delay content = "Not ready for mobile... yet!">
+					<button onClick={() => isMobileΔ(false)}>
+						Proceed anyway?
+					</button>
+				</Delay>
 			}
 		</div>
 	</>)
 }
 
-function Delay({content}:any){
+function Delay({content, children}:any){
 	return(<>
 		<div
 			className='centerflex'
 			style={{
+				position:`absolute`,
+				zIndex:`6000`,
+				top:`0`,
+				left:`0`,
+				height:`${100}%`,
+				width:`${100}%`,
 				textAlign:`center`,
 				overflow:`hidden`,
-				pointerEvents:`none`,
-				userSelect:`none`,
-				width:`${100}%`,
-				height:`${100}%`,
+				backgroundColor:`white`,
 			}}
 		>
 			<h1 style={{
 				transform:`translate(${0}%, ${-50}%)`,
 			}}>
-				{content}
+				<div style={{
+					pointerEvents:`none`,
+					userSelect:`none`,
+				}}>
+					{content}
+				</div>
+				<div>
+					{children}
+				</div>
 			</h1>
 		</div>
 	</>)
