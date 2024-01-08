@@ -1,14 +1,34 @@
-import { useSession, signIn, signOut, } from "next-auth/react";
-import { __x, __o, } from '../tools/defaults';
-import { useEffect, useState, useRef } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
 
-import { Magic } from "magic-sdk";
-// magic-sdk is only availabile in the browser
+import {
+	__x,
+	__o,
+} from '../tools/defaults';
+
+import {
+	useSession,
+	signIn,
+	signOut,
+} from "next-auth/react";
+
+import {
+	useEffect,
+	useState,
+	useRef,
+} from "react";
+
+import {
+	Magic,
+} from "magic-sdk"; // magic-sdk is only availabile in the browser
+
 const magic = typeof window !== 'undefined' && new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY || 'a');
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 export default function Login(){
-	//console.log("login component rendered")
-	const {data: sessionData} = useSession(); // returned object's .data property is assigned and renamed to sessionData
+
+	const {data: sessionData} = useSession(); // .data property is assigned and renamed to sessionData
 
 	const [ formEmail, formEmailΔ ] = useState("");
 
@@ -46,76 +66,74 @@ export default function Login(){
 		}
 		else{signOut()}
 	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	return(
 		<div
 			className='centerflex'
-			style={{
-				flexDirection:`column`,
-			}}
+			style={{ flexDirection:`column` }}
 		>
-			{
-				__x
-				&& sessionData
-				&& <div
-					style={{
-						...styleBox,
-					}}
-				>
-					Logged in from {sessionData.user?.email}
-				</div>
-			}
 			<form
 				onSubmit={(e)=>{
 					handleSignIn()
-					e.preventDefault() // stop refresh so that the popup can appear
+					e.preventDefault() // stop page refresh so that the popup can appear
 				}}
 			>
+
 				{
-					__x
-					&& !sessionData
-					&& <textarea
-					ref={textRef}
-					style={{
-						...styleBox,
-						height:`60px`,
-						resize:`none`,
-						overflow:`hidden`,
-						outline:`2px solid black`,
-					}}
-					onKeyDown={(e)=>{
-						if(
-							__x
-							&& e.key == "Enter"
-							//&& !e.shiftKey
-						){
-							e.preventDefault(); 
-							const ref = buttonRef.current; if(ref != null){ref.click()}
-							return true
-						}
-					}}
-					placeholder="email address"
-					value={formEmail}
-					onChange={(e) => formEmailΔ(e.target.value)}
-				/>
+					__o
+					||(
+						__x
+						&& sessionData
+						&&(
+							<div style={{ ...styleBox }}>
+								Logged in from {sessionData.user?.email}
+							</div>
+						)
+					)
+					||(
+						<textarea
+							ref={textRef}
+							style={{
+								...styleBox,
+								height:`60px`,			resize:`none`,
+								overflow:`hidden`,	outline:`2px solid black`,
+							}}
+							placeholder="email address"
+							value={formEmail}
+							onChange={(e) => formEmailΔ(e.target.value)}
+							onKeyDown={(e)=>{
+								if(
+									__x
+									&& e.key == "Enter"
+									//&& !e.shiftKey
+								){
+									e.preventDefault(); 
+									const ref = buttonRef.current
+									if(ref != null){ref.click()}
+									return true
+								}
+							}}
+						/>
+					)
 				}
 
 				<button
 					ref={buttonRef}
 					type="submit"
 					style={{
-						height:`40px`,
-						width:`240px`,
-						fontSize:`120%`,
-						marginTop:`10px`,
+						height:`40px`,		fontSize:`120%`,
+						width:`240px`,		marginTop:`10px`,
 					}}
 				>
-					{
-						sessionData? "Sign out": "Sign in"
-					}
+					{ sessionData? "Sign out": "Sign in" }
 				</button>
+
 			</form>
 		</div>
 	)
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

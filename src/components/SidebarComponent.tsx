@@ -1,23 +1,44 @@
-import { __x, __o, } from '../tools/defaults';
-import { recolor, } from '../tools/functions';
-
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useRef, useCallback, } from 'react';
-import { useDeviceSelectors } from 'react-device-detect';
-
-import { useRecoilState, useRecoilValue } from 'recoil';
+/* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-	NEO_canvasID_atom,
+	__x,
+	__o,
+} from '../tools/defaults';
+
+import {
+	recolor,
+} from '../tools/functions';
+
+import {
+	useState,
+	useEffect,
+	useRef,
+	useCallback,									
+} from 'react';
+
+import {
+	useDeviceSelectors,
+} from 'react-device-detect';
+
+import {
+	useRecoilState,
+	useRecoilValue,
+} from 'recoil';
+
+import {
+	selectedID_atom,
 	NEO_user_selector,
+	NEO_canvasID_atom,
 	NEO_note_atom,
 	NEO_pocketID_atom,
-	selectedID_atom,
-} from "./RecoilComponent";
-import Login from "./LoginComponent";
+} from "../store/index";
 
-/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+import
+	Login
+from "./LoginComponent";
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Sidebar(){
 	//console.log("sidebar component rendered")
@@ -25,17 +46,12 @@ export default function Sidebar(){
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
 	const [ pocketID, pocketIDΔ ] = useRecoilState(NEO_pocketID_atom)
 	const [ note, noteΔ ] = useRecoilState(NEO_note_atom(canvasID))
-	//console.log("note that we are on", note)
 
 	const [ selectors, data ] = useDeviceSelectors(window.navigator.userAgent)
 	const { isWindows } = selectors
 
 	const user = useRecoilValue(NEO_user_selector)
-	//console.log("user data", user)
 
-	//const currentID = useRecoilValue(NEO_user_selector).current
-	//const originID = useRecoilValue(NEO_user_selector).origin
-	
 	const seekOrigin = useCallback(() => {
 		if(canvasID == user.origin){ // you're on the origin
 			pocketIDΔ("")
@@ -46,7 +62,11 @@ export default function Sidebar(){
 			}
 			canvasIDΔ(user.origin) // go to origin
 		}
-	}, [canvasID, pocketID, user]);
+	},[
+		canvasID,
+		pocketID,
+		user,
+	]);
 
 	const selectedGlobalID = useRecoilValue(selectedID_atom)
 	useEffect(()=>{

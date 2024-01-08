@@ -3,21 +3,32 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-co
 import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 
+// TODO: use "owner" property instead of "Owns" relationship
+// this aims to reduce clutter in the Neo4j explorer and improve readability of GQL here
+// implementation started, but unknown misbehavior upon converting Note query definition
+	// short term: making sure the property is at least appended in addition to the relationship
+	// hydra complains of the passed object having no LinksOut property, likely just any property
+	// hydra selector and Recoil component won't log what's being passed before the error happens
+
+// TODO: use "Current" relationship instead of "current" property
+// this aims to prevent assignment of a reference when its target may not exist
+// sidesteps the need for secondary checks or retrieval of a backup note
+
 const typeDefs = gql`
 
-	type Query {
+	type Query{
 
-		UUIDs: UUIDs! @cypher(statement: """
-					RETURN {linkID: randomUUID(), noteID: randomUUID()} as output
-			""")
+		UUIDs:UUIDs! @cypher(statement:"""
+			RETURN { linkID:randomUUID(), noteID:randomUUID() } as output
+		""")
 
-		Note(noteID: String, userID: String): Note @cypher(statement: """
-      	MATCH (u:User{uuid:$userID})-[:Owns]->(n:Note{uuid:$noteID})
+		Note( noteID:String, userID:String ):Note @cypher(statement:"""
+      	MATCH (u:User{uuid:userID})-[:Owns]->(n:Note{uuid:noteID})
       	RETURN n
     	""")
 
-		User(email: String): User @cypher(statement: """
-			OPTIONAL MATCH (u:User {email: $email})
+		User( email:String ):User @cypher(statement:"""
+			OPTIONAL MATCH ( u:User {email:$email} )
 			WITH u
 			WHERE u IS NOT NULL
 			RETURN u AS User
@@ -30,98 +41,99 @@ const typeDefs = gql`
 	}
 
 
-	type UUIDs {
-		linkID: String
-		noteID: String
+	type UUIDs{
+		linkID:String
+		noteID:String
 	}
 	
 
-	type Note {
-		uuid: String
-		color: String
-		icon: String
-		text: String
-		linksOut: [LinkOutbound!]! @cypher(statement: """
+	type Note{
+		uuid:String
+		color:String
+		icon:String
+		text:String
+		owner:String
+		linksOut:[LinkOutbound!]! @cypher(statement:"""
 			MATCH (this)-[l:Link]->()
 			RETURN l
 		""")
-		linksIn: [LinkInbound!]! @cypher(statement: """
+		linksIn:[LinkInbound!]! @cypher(statement:"""
 			MATCH (this)<-[l:Link]-()
 			RETURN l
 		""")
 	}
 
 
-	type LinkOutbound implements Link {
-		uuid: String
-		position: Position
-		length: Length
-		canTravel: Boolean
-		destination: Note @cypher(statement: """
+	type LinkOutbound implements Link{
+		uuid:String
+		position:Position
+		size:Size
+		canTravel:Boolean
+		destination:Note @cypher(statement:"""
 			MATCH (source)-[this]->(d)
 			RETURN d
 		""")
 	}
 
-
-	type LinkInbound implements Link {
-		uuid: String
-		position: Position
-		length: Length
-		canTravel: Boolean
-		destination: Note @cypher(statement: """
+	type LinkInbound implements Link{
+		uuid:String
+		position:Position
+		size:Size
+		canTravel:Boolean
+		destination:Note @cypher(statement:"""
 			MATCH (source)<-[this]-(d)
 			RETURN d
 		""")
 	}
 
 
-	interface Link {
-		uuid: String
-		position: Position
-		length: Length
-		canTravel: Boolean
-		destination: Note
+	interface Link{
+		uuid:String
+		position:Position
+		size:Size
+		canTravel:Boolean
+		destination:Note
 	}
 
 
-	type Position {
-		x: Float!
-		y: Float!
+	type Position{
+		x:Float!
+		y:Float!
 	}
 
 
-	type Length {
-		x: Float!
-		y: Float!
+	type Size{
+		x:Float!
+		y:Float!
 	}
 
 
-	type User {
-		uuid: String
-		origin: String
-		email: String
-		current: String
-		isAdmin: Boolean
+	type User{
+		uuid:String
+		origin:String
+		email:String
+		current:String
+		isAdmin:Boolean
 	}
 
 
-	type Mutation {
+	type Mutation{
 
-		createUser(email: String!): User @cypher(statement: """
+		createUser( userID:String! ):User @cypher(statement:"""
 			CREATE (
 				n:Note{
 					uuid:randomUUID(),
-					color: 'hsl(0,0%,90%)',
-					icon: '🧿',
-					text: 'Origin',
-					origin:true
+					color:'hsl(0,0%,90%)',
+					icon:'🧿',
+					text:'Origin',
+					origin:true,
+					owner:$userID
 				}
 			)
 			WITH n
 			CREATE (
 				u:User{
-					email:$email,
+					email:$userID,
 					uuid:randomUUID(),
 					current:n.uuid,
 					origin:n.uuid
@@ -130,128 +142,113 @@ const typeDefs = gql`
 			RETURN u
 		""")
 
-		editLink(uuid: String, data: LinkInput!, userID: String): ReLink @cypher(statement:"""
-			MATCH (u:User{email:userID})-[:Owns]->()<-[l:Link{uuid: $uuid}]-()
-			SET l += {
-				position: point({x: coalesce($data.position.x, l.position.x), y: coalesce($data.position.y, l.position.y)}),
-  				length: point({x: coalesce($data.length.x, l.length.x), y: coalesce($data.length.y, l.length.y)}),
-  				canTravel: coalesce($data.canTravel, l.canTravel)
-			}
-			RETURN l
-		""")
-
-		createLink(sourceID:String, data:LinkInput!, targetID:String, userID:String): Boolean @cypher(statement:"""
-			MATCH (s:Note{uuid:sourceID})<-[:Owns]-(u:User{email:userID})-[:Owns]->(t:Note{uuid:targetID})
-			CREATE (s)-[:Link{
-				uuid:$data.uuid,
-				canTravel:$data.canTravel,
-				position:point({
-					x:$data.position.x,
-					y:$data.position.y
-				}),
-				length:point({
-					x:$data.length.x,
-					y:$data.length.y
-				})
-			}]->(t)
-		""")
-
-		createNote(note:NoteInput!, link:LinkInput!, user:String, canvasID:String): ReNote @cypher(statement:"""
-			MATCH (u:User{email:user})-[:Owns]->(c:Note{uuid:canvasID})
-			CREATE (u)-[:Owns]->(n:Note{
-				uuid:$note.uuid,
-				color:'' + $note.color,
-				icon:$note.icon,
-				text:$note.text
-			})<-[l:Link{
+		createNote( userID:String, sourceID:String, link:LinkInput!, note:NoteInput! ):Boolean @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->(s:Note{uuid:sourceID})
+			CREATE (s)-[l:Link{
 				uuid:$link.uuid,
 				canTravel:$link.canTravel,
 				position:point({
 					x:$link.position.x,
 					y:$link.position.y
 				}),
-				length:point({
-					x:$link.length.x,
-					y:$link.length.y
+				size:point({
+					x:$link.size.x,
+					y:$link.size.y
 				})
-			}]-(c)
-			RETURN n
+			}]->(t:Note{
+				uuid:$note.uuid,
+				color:'' + $note.color,
+				icon:$note.icon,
+				text:$note.text,
+				owner:$userID
+			})<-[:Owns]-(u)
+
 		""")
 
-		editNote(uuid: String, data: NoteInput!, userID: String): ReNote @cypher(statement:"""
-			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid: $uuid})
+		createLink( userID:String, sourceID:String, link:LinkInput!, targetID:String ):Boolean @cypher(statement:"""
+			MATCH (s:Note{uuid:sourceID})<-[:Owns]-(u:User{email:userID})-[:Owns]->(t:Note{uuid:targetID})
+			CREATE (s)-[:Link{
+				uuid:$link.uuid,
+				canTravel:$link.canTravel,
+				position:point({
+					x:$link.position.x,
+					y:$link.position.y
+				}),
+				size:point({
+					x:$link.size.x,
+					y:$link.size.y
+				})
+			}]->(t)
+		""")
+
+
+
+		editNote( userID:String, note:NoteInput! ):Boolean @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:$note.uuid})
 			SET n += {
-				color: coalesce($data.color, n.color),
-				icon: coalesce($data.icon, n.icon),
-				text: coalesce($data.text, n.text)
+				color:coalesce( $note.color, n.color ),
+				icon:coalesce( $note.icon, n.icon ),
+				text:coalesce( $note.text, n.text )
 			}
-			RETURN n
 		""")
 
-		deleteNote(noteID:String, userID:String): Note @cypher(statement:"""
-			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
-			DETACH DELETE n
+		editLink( userID:String, link:LinkInput! ):Boolean @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->()-[l:Link{uuid:$link.uuid}]->()
+			SET l += {
+				position:point({ x:coalesce( $link.position.x, l.position.x ), y:coalesce( $link.position.y, l.position.y ) }),
+				size:point({ x:coalesce( $link.size.x, l.size.x ), y:coalesce( $link.size.y, l.size.y ) }),
+				canTravel:coalesce( $link.canTravel, l.canTravel )
+			}
 		""")
+ 
 
-		deleteLink(linkID: String, noteID: String, userID: String): Boolean @cypher(statement: """
-			MATCH (u:User {email: $userID})-[:Owns]->(n:Note{uuid: $noteID})-[l:Link {uuid: $linkID}]-()
+
+		deleteLink( userID:String, noteID:String, linkID:String ):Boolean @cypher(statement: """
+			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})-[l:Link{uuid:linkID}]-()
 			DETACH DELETE l
-			WITH n, ((n)-[:Link]-() OR u.origin = n.uuid OR u.current = n.uuid) AS stillConnected
+			WITH n, ((n)-[:Link]-() OR n.uuid = u.origin OR n.uuid = u.current) AS stillConnected
 			WHERE NOT stillConnected
 			DETACH DELETE n
 			RETURN stillConnected
 		""")
 
-		setCurrent( userID:String, noteID:String ): Boolean @cypher(statement:"""
+
+		
+		setCurrent( userID:String, noteID:String ):Boolean @cypher(statement:"""
 			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
 			SET u.current = n.uuid
 		""")
 	}
 
 
-	type ReNote {
-		uuid: String
-		color: String
-		icon: String
-		text: String
+	input NoteInput{
+		uuid:String
+		color:String
+		icon:String
+		text:String
 	}
 
-
-	input NoteInput {
-		uuid: String
-		color: String
-		icon: String
-		text: String
+	input LinkInput{
+		uuid:String
+		size:ReSize
+		position:RePosition
+		canTravel:Boolean
 	}
 
-
-	type ReLink {
-		uuid: String
-		position: Position
-		length: Length
-		canTravel: Boolean
+	input RePosition{
+		x:Float!
+		y:Float!
 	}
 
-
-	input LinkInput {
-		uuid: String
-		position: RePosition
-		length: ReLength
-		canTravel: Boolean
+	input ReSize{
+		x:Float!
+		y:Float!
 	}
 
-
-	input RePosition {
-		x: Float!
-		y: Float!
-	}
-
-
-	input ReLength {
-		x: Float!
-		y: Float!
-	}
 `
+
+// GQL appears not to like Position as interchangeable between use in a LinkInput input and Link interface, like it does with String which is treated differently as a scalar
+// defining Position as a scalar seems to also require a custom resolver which you're not interested in right now
 
 const driver = neo4j.driver(
 	process.env.NEO4J_URI,
@@ -321,3 +318,13 @@ export const config = {
 // links did not behave when the query did not care about direction
 // possibly two problems with this at both the level of links query and destination query
 // queryside union produced nothing
+
+
+/*
+	
+		deleteNote( noteID:String, userID:String ):Note @cypher(statement:"""
+			MATCH (u:User{email:userID})-[:Owns]->(n:Note{uuid:noteID})
+			DETACH DELETE n
+		""")
+*/
+// extra function not needed right now because deleteLink can identify orphans
