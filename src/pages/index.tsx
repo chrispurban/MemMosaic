@@ -7,7 +7,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 
 import dynamic from "next/dynamic";
-const Spine = dynamic(() => import("../components/SpineComponent"), { ssr: false }); // turn ssr back on later, push down to canvas
+const Spine = dynamic(() => import("../components/_Spine"), { ssr: false }); // turn ssr back on later, push down to canvas
 
 const Home: NextPage = () => {
   //const hello = trpc.example.hello.useQuery({ text: "from tRPC" });

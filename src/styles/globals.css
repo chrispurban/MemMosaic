@@ -33,3 +33,9 @@ textarea {
 }
 
 textarea:focus {}
+
+.centerflex{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}

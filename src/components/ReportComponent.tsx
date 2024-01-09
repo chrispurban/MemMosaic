@@ -1,22 +1,35 @@
-import { __x, __o } from '../tools/defaults';
+/* eslint-disable react-hooks/exhaustive-deps */
 
-import { NEO_canvasID_atom, NEO_note_atom, NEO_pocketID_atom, selectedID_atom, view_atom, } from "./RecoilComponent";
-import { useRecoilState, useRecoilValue, useSetRecoilState, } from "recoil";
+import {
+	__x,
+	__o,
+} from '../tools/defaults';
 
-import { useEffect, useState } from 'react';
-import { useDeviceSelectors } from 'react-device-detect';
+import {
+	useRecoilState,
+} from "recoil";
 
-////////////////////////////////////////////////////////////////////////////////////////////
+import {
+	view_atom,
+} from "../store/index";
+
+import {
+	useEffect,
+} from 'react';
+
+import {
+	useDeviceSelectors,
+} from 'react-device-detect';
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Report(){
-	//console.log("report component rendered")
 
 	const [ view, viewΔ ] = useRecoilState(view_atom);
 	const [ selectors, deviceData ] = useDeviceSelectors(window.navigator.userAgent)
-
 	
 	useEffect(()=>{
-	//	console.log(selectors)
 		viewΔ((v:any)=>{return{
 			...v,
 			system:{
@@ -27,34 +40,6 @@ export default function Report(){
 			}
 		}})
 	},[]);
-	
-	
-	// master navigation shortcuts
-	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom);
-	const [ pocketID, pocketIDΔ ] = useRecoilState(NEO_pocketID_atom);
-	const selectedGlobalID = useRecoilValue(selectedID_atom)
-	useEffect(()=>{
-		const handleKey = (e:any)=>{
-			if(pocketID && !selectedGlobalID){
-				if(e.key == "End"){
-					const swapID = canvasID
-					canvasIDΔ(pocketID)
-					pocketIDΔ(swapID)
-				}
-				else if(e.key == "Escape" || e.key == "Delete"){
-					pocketIDΔ("")
-				}
-			}
-		};			window.addEventListener(	'keyup', handleKey);
-		return ()=>{window.removeEventListener('keyup', handleKey);};
-	},[
-		pocketID,
-		canvasID,
-		selectedGlobalID,
-	])
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////////
 
 	function getView(){
 
@@ -105,64 +90,49 @@ export default function Report(){
 		return () => window.removeEventListener("resize", getView);
 	},[]);
 
- 	 //////////////////////////////////////////////////////////////////////////////////////////////
-
-	/*
-	useEffect(()=>{
-		const handleKey = (e:any)=>{
-			if(e.key == "Home"){
-				console.clear()
-			}
-		}
-		window.addEventListener('keyup', handleKey);
-		return ()=>{window.removeEventListener('keyup', handleKey);};
-	},[
-	])
-	*/
-
-	/*
-	const panopticon = useRecoilSnapshot()
-	useEffect(()=>{const hk=(e:any)=>{if(e.key=="End"){
-		for (const node of panopticon.getNodes_UNSTABLE({isModified: true})) {
-			console.warn(node.key, panopticon.getLoadable(node));
-		}
-	}};window.addEventListener('keyup',hk);return()=>{window.removeEventListener('keyup',hk);};},[
-		panopticon
-	])
-	*/
-
-  //////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	return(
-		<>{
-			/*
-			<div style={{
-				position:`absolute`,
-				zIndex:5000,
-				backgroundColor:`green`,
-				left:'0', top:'0',
-				width:'200px', height:`${view.absolute-10}px`,
-			}}>
+		<>
+			{
+				/*
+				<div style={{
+					position:`absolute`,
+					zIndex:5000,
+					backgroundColor:`green`,
+					left:'0', top:'0',
+					width:'200px', height:`${view.absolute-10}px`,
+				}}>
 
-			</div>
-			*/
-		}</>
+				</div>
+				*/
+			}
+		</>
 	)
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-{
-	__o
-	&&(
-		<div style={{position:`absolute`, top:`50%`, left:`50%`, translate:`-50% -50%`, outline:`1px solid black`, zIndex:40000, maxWidth:`300px`, color:`white`, textAlign:`left`, backgroundColor:`hsla(0, 0%, 20%, 1.0)`}}>
-			<pre style={{
-				overflowY:`auto`,
-				overflowX:`hidden`,
-			}}>
-				{JSON.stringify(window.matchMedia("(pointer: fine)").matches, null, '\r')}
-			</pre>
-		</div>
-	)
-	{JSON.stringify(view.system, null, '\r')}
-}
+	{
+		__o
+		&&(
+			<div style={{position:`absolute`, top:`50%`, left:`50%`, translate:`-50% -50%`, outline:`1px solid black`, zIndex:40000, maxWidth:`300px`, color:`white`, textAlign:`left`, backgroundColor:`hsla(0, 0%, 20%, 1.0)`}}>
+				<pre style={{
+					overflowY:`auto`,
+					overflowX:`hidden`,
+				}}>
+					{JSON.stringify(window.matchMedia("(pointer: fine)").matches, null, '\r')}
+				</pre>
+			</div>
+		)
+		{JSON.stringify(view.system, null, '\r')}
+	}
 */

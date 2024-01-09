@@ -5,6 +5,18 @@ import { useSession, signIn, signOut, } from "next-auth/react";
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+export function subset(sourceObject, targetProperties){
+	return Object
+		.keys(sourceObject)
+		.filter(sourceProperty => targetProperties.includes(sourceProperty))
+		.reduce((targetObject, sourceProperty)=>({
+			...targetObject,
+			[sourceProperty]:sourceObject[sourceProperty]
+		}),{});
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
 export function useInterval(delayInterval, delayedFunction) {
 	const preservedFunction = useRef();
 

@@ -1,23 +1,44 @@
-import { __x, __o, } from '../tools/defaults';
-import { recolor, } from '../tools/functions';
-
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useRef, useCallback, } from 'react';
-import { useDeviceSelectors } from 'react-device-detect';
-
-import { useRecoilState, useRecoilValue } from 'recoil';
+/* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-	NEO_canvasID_atom,
+	__x,
+	__o,
+} from '../tools/defaults';
+
+import {
+	recolor,
+} from '../tools/functions';
+
+import {
+	useState,
+	useEffect,
+	useRef,
+	useCallback,									
+} from 'react';
+
+import {
+	useDeviceSelectors,
+} from 'react-device-detect';
+
+import {
+	useRecoilState,
+	useRecoilValue,
+} from 'recoil';
+
+import {
+	selectedID_atom,
 	NEO_user_selector,
+	NEO_canvasID_atom,
 	NEO_note_atom,
 	NEO_pocketID_atom,
-	selectedID_atom,
-} from "./RecoilComponent";
-import Login from "./LoginComponent";
+} from "../store/index";
 
-/*///////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+import
+	Login
+from "./LoginComponent";
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export default function Sidebar(){
 	//console.log("sidebar component rendered")
@@ -25,18 +46,12 @@ export default function Sidebar(){
 	const [ canvasID, canvasIDΔ ] = useRecoilState(NEO_canvasID_atom)
 	const [ pocketID, pocketIDΔ ] = useRecoilState(NEO_pocketID_atom)
 	const [ note, noteΔ ] = useRecoilState(NEO_note_atom(canvasID))
-	//console.log("note that we are on", note)
 
 	const [ selectors, data ] = useDeviceSelectors(window.navigator.userAgent)
 	const { isWindows } = selectors
 
 	const user = useRecoilValue(NEO_user_selector)
-	//console.log("user data", user)
 
-	//const currentID = useRecoilValue(NEO_user_selector).current
-	//const originID = useRecoilValue(NEO_user_selector).origin
-
-	
 	const seekOrigin = useCallback(() => {
 		if(canvasID == user.origin){ // you're on the origin
 			pocketIDΔ("")
@@ -47,7 +62,11 @@ export default function Sidebar(){
 			}
 			canvasIDΔ(user.origin) // go to origin
 		}
-	}, [canvasID, pocketID, user]);
+	},[
+		canvasID,
+		pocketID,
+		user,
+	]);
 
 	const selectedGlobalID = useRecoilValue(selectedID_atom)
 	useEffect(()=>{
@@ -97,37 +116,42 @@ export default function Sidebar(){
 				&& <div
 					ref={componentRef}
 					style={{
-						position:'absolute',
-
-						//...(expanded?{width:'260px',}:{}),
-
-						right:!left?`${expanded?0:10}px`:undefined,
-						left:left?`${expanded?0:10}px`:undefined,
-
-
-						top:`${expanded?0:10}px`,
-						...(expanded?{width:'260px', height:`100%`, }:{}),
-						zIndex:'1000',
-						padding:`${expanded?10:0}px`,
 						display:`flex`,
+						position:'absolute',
 						flexDirection:`column`,
 						gap:`12px`,
-						backgroundColor:recolor(note.color, {lum:(-30)}),
+						zIndex:'1000',
 						outline:`2px solid ${recolor(note.color, {lum:(-40)})}`,
+						background:				recolor(note.color, {lum:(-30)}),
+						...(left
+							?{
+								left:`${expanded?0:10}px`,
+								marginRight:`auto`,
+							}
+							:{
+								right:`${expanded?0:10}px`,
+								marginLeft:`auto`,
+							}
+						),
+						...(expanded
+							?{top:`0px`, width:'260px', height:`100%`, padding:`10px`,}
+							:{top:`10px`,}
+						),
 					}}
 				>
 					<button
+						className='centerflex'
 						style={{
-							marginLeft:left?undefined:`auto`,
-							marginRight:!left?undefined:`auto`,
 							width:'40px', height:'40px',
-							display: `flex`,
-							alignItems:`center`, justifyContent:`center`,
 							textAlign:`center`,
 							border:`0px`,
-							background:recolor(note.color, {hue:0, lum:(-20), sat:0}),
-							outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40)})}`,
 							userSelect:`none`,
+							outline:`1px solid ${recolor(note.color, {lum:(expanded?-50:-40)})}`,
+							background:				recolor(note.color, {lum:(-20)}),
+							...(left
+								?{marginRight:`auto`}
+								:{marginLeft:`auto`}
+							),
 						}}
 						onClick={(e)=>{
 							if(left){ // temporary behavior; once history is added, this will become the first option within it
@@ -139,11 +163,15 @@ export default function Sidebar(){
 							e.stopPropagation()
 						}}
 					>
-						<span style={{
-							paddingTop:`${isWindows?0:2}px`,
-							paddingBottom:`${isWindows?3:0}px`,
-							fontSize:`175%`,
-						}}>
+						<span
+							style={{
+								...(isWindows
+									?{paddingBottom:`3px`,}
+									:{paddingTop:`2px`,}
+								),
+								fontSize:`175%`,
+							}}
+						>
 							{left?"🧿":"👤"}
 						</span>
 					</button>
@@ -182,12 +210,14 @@ export default function Sidebar(){
 				</div>
 				{
 					__o
-					&& <pre style={{
-					overflowY:`auto`,
-					overflowX:`hidden`,
-					}}>
-						{JSON.stringify(selectors, null, '\r')}
-					</pre>
+					&&(
+						<pre style={{
+							overflowY:`auto`,
+							overflowX:`hidden`,
+						}}>
+							{JSON.stringify(selectors, null, '\r')}
+						</pre>
+					)
 				}
 			</>
 		}/>
