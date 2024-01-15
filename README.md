@@ -1,27 +1,32 @@
-# Create T3 App
+# MemMosaic
 
-This is an app bootstrapped according to the [init.tips](https://init.tips) stack, also known as the T3-Stack.
+Freeform notes inspired by the "memory palace" concept: navigate and rearrange topics as you would rooms and furniture, relying on position and color rather than the tangled lines of traditional mind maps.
 
-## What's next? How do I make an app with this?
+https://mem-mosaic-chrispurban.vercel.app/
 
-We try to keep this project as simple as possible, so you can start with the most basic configuration and then move on to more advanced configuration.
+Most action and annotation is contained within src/components/NoteComponent.tsx. Each instance is generated within CanvasComponent, and is what changes when a traversable note is clicked.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+State logic is contained within store/RecoilJS. The store/RecoilJS/hydra.js selector is responsible for progressively loading new sets of notes, doing the most processing of the read query. Writes happen through store/RecoilJS/editors/server_transaction.js, adding them to a queue to be enacted via src/components/RecoilComponent.js.
 
-- [Next-Auth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [TailwindCSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+Recoil has built-in features for interacting with GraphQL to where this queue would not be required, but implementation details differ from the specific GraphQL library provided by Neo4j which also constructs resolvers automatically. It won't be fully known which direction to take until rollout of feature phase 2 allowing notes to be clustered, adding a new layer beyond canvas >> link >> note.
 
-We also [roll our own docs](https://create.t3.gg) with some summary information and links to the respective documentation.
+## Technologies
 
-Also checkout these awesome tutorials on `create-t3-app`.
+- React
+- Recoil
+- GraphQL
+- Neo4j
+- Next
+- Vercel
+- Magic Link
 
-- [Build a Blog With the T3 Stack - tRPC, TypeScript, Next.js, Prisma & Zod](https://www.youtube.com/watch?v=syEWlxVFUrY)
-- [Build a Live Chat Application with the T3 Stack - TypeScript, Tailwind, tRPC](https://www.youtube.com/watch?v=dXRRY37MPuk)
-- [Build a full stack app with create-t3-app](https://www.nexxel.dev/blog/ct3a-guestbook)
-- [A first look at create-t3-app](https://dev.to/ajcwebdev/a-first-look-at-create-t3-app-1i8f)
+Additional packages were included as part of setup with the "[T3 Stack](https://create.t3.gg/)", but are on hold because of library conflicts that haven't been understood or reconciled yet. They are:
 
-## How do I deploy this?
+- NextAuth
+- Prisma
+- tRPC
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## About the Author
+
+https://www.chrispurban.com/
+
